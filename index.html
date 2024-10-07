@@ -187,19 +187,10 @@
             document.getElementById('controls').style.display = 'none';
             activeDimension = (activeDimension % 3) + 1; // Cycle between 1, 2, 3
 
-            if (activeDimension === 1) {
-                canvas.style.opacity = "1";
-                dimensionCanvas.style.opacity = "0.2";
-                thirdCanvas.style.opacity = "0.2";
-            } else if (activeDimension === 2) {
-                dimensionCanvas.style.opacity = "1";
-                canvas.style.opacity = "0.2";
-                thirdCanvas.style.opacity = "0.2";
-            } else if (activeDimension === 3) {
-                thirdCanvas.style.opacity = "1";
-                canvas.style.opacity = "0.2";
-                dimensionCanvas.style.opacity = "0.2";
-            }
+            canvas.style.opacity = activeDimension === 1 ? "1" : "0.2";
+            dimensionCanvas.style.opacity = activeDimension === 2 ? "1" : "0.2";
+            thirdCanvas.style.opacity = activeDimension === 3 ? "1" : "0.2";
+
             startGame();
         }
 
