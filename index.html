@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conway's Game of Life</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #controls {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <div id="controls">
+        <button onclick="addGlider()">Add a Glider</button>
+        <button onclick="increasePropagation()">Increase Propagation Rate</button>
+        <button onclick="increaseLifespan()">Increase Lifespan</button>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridWidth = 50;
+        const gridHeight = 50;
+        const cellSize = canvas.width / gridWidth;
+        let grid = createGrid();
+        let steps = 0;
+        let interval;
+        let propagationRate = 100; // Speed of evolution
+        let lifespan = 20; // Steps between evolutionary options
+
+        function createGrid() {
+            let arr = new Array(gridHeight);
+            for (let y = 0; y < gridHeight; y++) {
+                arr[y] = new Array(gridWidth).fill(0);
+            }
+            return arr;
+        }
+
+        function drawGrid(grid) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    if (grid[y][x] === 1) {
+                        ctx.fillStyle = 'black';
+                    } else {
+                        ctx.fillStyle = 'white';
+                    }
+                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        function nextGeneration() {
+            const newGrid = createGrid();
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    const neighbors = countNeighbors(grid, x, y);
+                    if (grid[y][x] === 1) {
+                        newGrid[y][x] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+                    } else {
+                        newGrid[y][x] = neighbors === 3 ? 1 : 0;
+                    }
+                }
+            }
+            return newGrid;
+        }
+
+        function countNeighbors(grid, x, y) {
+            let sum = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const col = (x + i + gridWidth) % gridWidth;
+                    const row = (y + j + gridHeight) % gridHeight;
+                    sum += grid[row][col];
+                }
+            }
+            sum -= grid[y][x];
+            return sum;
+        }
+
+        function stepGame() {
+            grid = nextGeneration();
+            drawGrid(grid);
+            steps++;
+            if (steps % lifespan === 0) {
+                pauseGame();
+                document.getElementById('controls').style.display = 'block';
+            }
+        }
+
+        function startGame() {
+            interval = setInterval(stepGame, propagationRate);
+        }
+
+        function pauseGame() {
+            clearInterval(interval);
+        }
+
+        function addGlider() {
+            document.getElementById('controls').style.display = 'none';
+            grid[1][2] = 1;
+            grid[2][3] = 1;
+            grid[3][1] = 1;
+            grid[3][2] = 1;
+            grid[3][3] = 1;
+            startGame();
+        }
+
+        function increasePropagation() {
+            document.getElementById('controls').style.display = 'none';
+            propagationRate = Math.max(50, propagationRate - 20); // Increase speed
+            startGame();
+        }
+
+        function increaseLifespan() {
+            document.getElementById('controls').style.display = 'none';
+            lifespan += 5; // Increase time between evolutionary steps
+            startGame();
+        }
+
+        grid[24][24] = 1; // Seed the grid with a single live cell
+        drawGrid(grid);
+        startGame();
+    </script>
+</body>
+</html>
