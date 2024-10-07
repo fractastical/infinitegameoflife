@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dimensional Conway's Game of Life </title>
+    <title>Multi-Dimensional Conway's Game of Life</title>
     <style>
         body {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
         }
         #gameContainer {
             position: relative;
             width: 500px;
             height: 500px;
+            margin-top: 20px;
         }
         canvas {
             position: absolute;
@@ -25,10 +27,7 @@
             border: 1px solid #000;
         }
         #controls {
-            position: absolute;
-            top: 510px;
-            left: 0;
-            width: 100%;
+            margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
@@ -39,6 +38,10 @@
             font-size: 14px;
             cursor: pointer;
         }
+        #info {
+            margin-top: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -47,7 +50,7 @@
     </div>
     
     <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension  v0.125</button>
+        <button onclick="switchDimension()">Switch Dimension</button>
         <button onclick="addDimension()">Add Dimension</button>
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
@@ -56,6 +59,13 @@
         <button onclick="addPattern('spaceship')">Add Spaceship</button>
         <button onclick="increasePropagation()">Increase Propagation Rate</button>
         <button onclick="increaseLifespan()">Increase Lifespan</button>
+    </div>
+
+    <div id="info">
+        <p>Active Dimension: <span id="activeDimensionDisplay">1</span></p>
+        <p>Total Dimensions: <span id="totalDimensionsDisplay">3</span></p>
+        <p>Propagation Rate: <span id="propagationRateDisplay">100</span> ms</p>
+        <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
     </div>
 
     <script>
@@ -163,10 +173,6 @@
                 drawGrid(dimension);
             });
             steps++;
-            if (steps % lifespan === 0) {
-                pauseGame();
-                document.getElementById('controls').style.display = 'block';
-            }
         }
 
         function startGame() {
@@ -183,13 +189,22 @@
             startGame();
         }
 
+        function updateInfo() {
+            document.getElementById('activeDimensionDisplay').textContent = activeDimension + 1;
+            document.getElementById('totalDimensionsDisplay').textContent = numDimensions;
+            document.getElementById('propagationRateDisplay').textContent = propagationRate;
+            document.getElementById('lifespanDisplay').textContent = lifespan;
+        }
+
         // Initialize and start the game
         initializeDimensions();
         startGame();
+        updateInfo();
 
         // Expose necessary functions to the global scope
         window.switchDimension = function() {
             activeDimension = (activeDimension + 1) % numDimensions;
+            updateInfo();
         };
 
         window.addDimension = function() {
@@ -201,8 +216,9 @@
                 };
                 dimensions.push(newDimension);
                 numDimensions++;
+                updateInfo();
             } else {
-                console.log("Maximum number of dimensions reached");
+                alert("Maximum number of dimensions reached");
             }
         };
 
@@ -216,18 +232,17 @@
             });
             
             drawGrid(dimensions[activeDimension]);
-            document.getElementById('controls').style.display = 'block';
-            startGame();
         };
 
         window.increasePropagation = function() {
             propagationRate = Math.max(50, propagationRate - 20); // Increase speed
             restartGame();
+            updateInfo();
         };
 
         window.increaseLifespan = function() {
             lifespan += 5; // Increase time between evolutionary steps
-            restartGame();
+            updateInfo();
         };
 
     })();
