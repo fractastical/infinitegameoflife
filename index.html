@@ -11,20 +11,31 @@
             top: 0;
             left: 0;
         }
+        #gameCanvas {
+            z-index: 1;
+        }
+        #dimensionCanvas {
+            z-index: 2;
+        }
         #controls {
             display: none;
             position: absolute;
             top: 10px;
             left: 10px;
+            z-index: 3;
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="500" height="500"></canvas>
-    <canvas id="dimensionCanvas" width="500" height="500" style="display:none;"></canvas>
+    <canvas id="dimensionCanvas" width="500" height="500"></canvas>
     
     <div id="controls">
-        <button onclick="addGlider()">Add a Glider</button>
+        <button onclick="addPattern('glider')">Add a Glider</button>
+        <button onclick="addPattern('blinker')">Add a Blinker</button>
+        <button onclick="addPattern('toad')">Add a Toad</button>
+        <button onclick="addPattern('beacon')">Add a Beacon</button>
+        <button onclick="addPattern('spaceship')">Add a Spaceship</button>
         <button onclick="increasePropagation()">Increase Propagation Rate</button>
         <button onclick="increaseLifespan()">Increase Lifespan</button>
         <button onclick="switchDimension()">Go to Another Dimension</button>
@@ -47,6 +58,15 @@
         let lifespan = 20; // Steps between evolutionary options
         let interval;
         let inDimension = false;
+
+        // GOL Patterns
+        const patterns = {
+            glider: [[0, 1], [1, 2], [2, 0], [2, 1], [2, 2]],
+            blinker: [[0, 1], [1, 1], [2, 1]],
+            toad: [[1, 0], [1, 1], [1, 2], [2, 1], [2, 2], [2, 3]],
+            beacon: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 2], [2, 3], [3, 2], [3, 3]],
+            spaceship: [[0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 3], [3, 0], [3, 2]]
+        };
 
         function createGrid() {
             let arr = new Array(gridHeight);
@@ -117,20 +137,21 @@
             clearInterval(interval);
         }
 
-        function addGlider() {
+        // Function to randomly place a pattern on the grid
+        function addPattern(patternName) {
             document.getElementById('controls').style.display = 'none';
+            const pattern = patterns[patternName];
+            const randX = Math.floor(Math.random() * (gridWidth - 5));
+            const randY = Math.floor(Math.random() * (gridHeight - 5));
+            
             if (!inDimension) {
-                grid[1][2] = 1;
-                grid[2][3] = 1;
-                grid[3][1] = 1;
-                grid[3][2] = 1;
-                grid[3][3] = 1;
+                pattern.forEach(([dx, dy]) => {
+                    grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
+                });
             } else {
-                dimensionGrid[1][2] = 1;
-                dimensionGrid[2][3] = 1;
-                dimensionGrid[3][1] = 1;
-                dimensionGrid[3][2] = 1;
-                dimensionGrid[3][3] = 1;
+                pattern.forEach(([dx, dy]) => {
+                    dimensionGrid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
+                });
             }
             startGame();
         }
@@ -147,13 +168,16 @@
             startGame();
         }
 
+        // Switch dimension and handle transparency
         function switchDimension() {
             document.getElementById('controls').style.display = 'none';
             inDimension = !inDimension;
             if (inDimension) {
-                dimensionCanvas.style.display = 'block';
+                dimensionCanvas.style.opacity = "1"; // Full opacity
+                canvas.style.opacity = "0.2"; // 20% visible
             } else {
-                dimensionCanvas.style.display = 'none';
+                canvas.style.opacity = "1"; // Full opacity
+                dimensionCanvas.style.opacity = "0.2"; // 20% visible
             }
             startGame();
         }
