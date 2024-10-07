@@ -3,76 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conway's Game of Life - Multidimensional 0.123</title>
+    <title>Multi-Dimensional Conway's Game of Life </title>
     <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #gameContainer {
+            position: relative;
+            width: 500px;
+            height: 500px;
+        }
         canvas {
-            border: 1px solid black;
             position: absolute;
             top: 0;
             left: 0;
-        }
-        #gameCanvas {
-            z-index: 1;
-        }
-        #dimensionCanvas {
-            z-index: 2;
-        }
-        #thirdDimensionCanvas {
-            z-index: 3;
+            border: 1px solid #000;
         }
         #controls {
-            display: none;
             position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 4;
+            top: 510px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
         }
     </style>
 </head>
-<body> VERSION 0.123
-    
-    <canvas id="gameCanvas" width="500" height="500"></canvas>
-    <canvas id="dimensionCanvas" width="500" height="500"></canvas>
-    <canvas id="thirdDimensionCanvas" width="500" height="500"></canvas>
-    
-    <div id="controls">
-        <button onclick="addPattern('glider')">Add a Glider</button>
-        <button onclick="addPattern('blinker')">Add a Blinker</button>
-        <button onclick="addPattern('toad')">Add a Toad</button>
-        <button onclick="addPattern('beacon')">Add a Beacon</button>
-        <button onclick="addPattern('spaceship')">Add a Spaceship</button>
-        <button onclick="increasePropagation()">Increase Propagation Rate</button>
-        <button onclick="increaseLifespan()">Increase Lifespan</button>
-        <button onclick="switchDimension()">Switch Dimension</button>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
     </div>
     
+    <div id="controls">
+        <button onclick="switchDimension()">Switch Dimension  v0.125</button>
+        <button onclick="addDimension()">Add Dimension</button>
+        <button onclick="addPattern('glider')">Add Glider</button>
+        <button onclick="addPattern('blinker')">Add Blinker</button>
+        <button onclick="addPattern('toad')">Add Toad</button>
+        <button onclick="addPattern('beacon')">Add Beacon</button>
+        <button onclick="addPattern('spaceship')">Add Spaceship</button>
+        <button onclick="increasePropagation()">Increase Propagation Rate</button>
+        <button onclick="increaseLifespan()">Increase Lifespan</button>
+    </div>
+
     <script>
+    (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const dimensionCanvas = document.getElementById('dimensionCanvas');
-        const dimensionCtx = dimensionCanvas.getContext('2d');
-        const thirdCanvas = document.getElementById('thirdDimensionCanvas');
-        const thirdCtx = thirdCanvas.getContext('2d');
-        
+
         const gridWidth = 50;
         const gridHeight = 50;
         const cellSize = canvas.width / gridWidth;
-        
-        let grid = createGrid();
-        let dimensionGrid = createGrid();
-        let thirdDimensionGrid = createGrid();
+
+        let dimensions = []; // Array to hold all dimension grids
+        let activeDimension = 0;
+        let numDimensions = 3; // Start with 3 dimensions, can be changed
+
         let steps = 0;
         let propagationRate = 100; // Speed of evolution
         let lifespan = 20; // Steps between evolutionary options
         let interval;
-        let activeDimension = 1; // Track which dimension is active: 1 = original, 2 = second, 3 = third
 
-        canvas.style.zIndex = "1";
-        dimensionCanvas.style.zIndex = "2";
-        thirdCanvas.style.zIndex = "3";
+        const colors = [
+            'rgba(0, 0, 0, 1)',    // Black
+            'rgba(0, 0, 255, 1)',  // Blue
+            'rgba(128, 0, 128, 1)', // Purple
+            'rgba(255, 0, 0, 1)',  // Red
+            'rgba(0, 255, 0, 1)',  // Green
+            'rgba(255, 255, 0, 1)' // Yellow
+        ];
 
-
-        // GOL Patterns
         const patterns = {
             glider: [[0, 1], [1, 2], [2, 0], [2, 1], [2, 2]],
             blinker: [[0, 1], [1, 1], [2, 1]],
@@ -81,25 +93,52 @@
             spaceship: [[0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 3], [3, 0], [3, 2]]
         };
 
-        function createGrid() {
-            let arr = new Array(gridHeight);
-            for (let y = 0; y < gridHeight; y++) {
-                arr[y] = new Array(gridWidth).fill(0);
+        function initializeDimensions() {
+            for (let i = 0; i < numDimensions; i++) {
+                dimensions.push({
+                    grid: createGrid(),
+                    canvas: createCanvas(i),
+                    color: colors[i % colors.length]
+                });
             }
-            return arr;
         }
 
+        function createGrid() {
+            return Array(gridHeight).fill().map(() => Array(gridWidth).fill(0));
+        }
+
+        function createCanvas(index) {
+            const newCanvas = document.createElement('canvas');
+            newCanvas.width = canvas.width;
+            newCanvas.height = canvas.height;
+            newCanvas.style.position = 'absolute';
+            newCanvas.style.top = '0';
+            newCanvas.style.left = '0';
+            newCanvas.style.zIndex = index + 1;
+            document.getElementById('gameContainer').appendChild(newCanvas);
+            return newCanvas;
+        }
+
+        function drawGrid(dimension) {
+            const ctx = dimension.canvas.getContext('2d');
+            ctx.clearRect(0, 0, dimension.canvas.width, dimension.canvas.height);
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    if (dimension.grid[y][x] === 1) {
+                        ctx.fillStyle = dimension.color;
+                        ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
 
         function nextGeneration(grid) {
             const newGrid = createGrid();
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
                     const neighbors = countNeighbors(grid, x, y);
-                    if (grid[y][x] === 1) {
-                        newGrid[y][x] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
-                    } else {
-                        newGrid[y][x] = neighbors === 3 ? 1 : 0;
-                    }
+                    newGrid[y][x] = (grid[y][x] === 1 && (neighbors === 2 || neighbors === 3)) || 
+                                     (grid[y][x] === 0 && neighbors === 3) ? 1 : 0;
                 }
             }
             return newGrid;
@@ -114,56 +153,24 @@
                     sum += grid[row][col];
                 }
             }
-            sum -= grid[y][x];
-            return sum;
+            return sum - grid[y][x];
         }
 
-        function drawGrid(grid, context, color) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            for (let y = 0; y < gridHeight; y++) {
-                for (let x = 0; x < gridWidth; x++) {
-                    if (grid[y][x] === 1) {
-                        context.fillStyle = color;
-                        context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                    }
-                }
-            }
-        }
-        
-        
         function stepGame() {
-            // Update all grids
-            grid = nextGeneration(grid);
-            dimensionGrid = nextGeneration(dimensionGrid);
-            thirdDimensionGrid = nextGeneration(thirdDimensionGrid);
-        
-            // Clear all canvases
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            dimensionCtx.clearRect(0, 0, canvas.width, canvas.height);
-            thirdCtx.clearRect(0, 0, canvas.width, canvas.height);
-        
-            // Draw all grids with different opacities based on active dimension
-            drawGrid(grid, ctx, `rgba(0, 0, 0, ${activeDimension === 1 ? 0.8 : 0.3})`);
-            drawGrid(dimensionGrid, dimensionCtx, `rgba(0, 0, 255, ${activeDimension === 2 ? 0.8 : 0.3})`);
-            drawGrid(thirdDimensionGrid, thirdCtx, `rgba(128, 0, 128, ${activeDimension === 3 ? 0.8 : 0.3})`);
-        
+            dimensions.forEach((dimension, index) => {
+                dimension.grid = nextGeneration(dimension.grid);
+                dimension.color = `rgba(${dimension.color.slice(5, -1)}, ${index === activeDimension ? 0.8 : 0.3})`;
+                drawGrid(dimension);
+            });
             steps++;
             if (steps % lifespan === 0) {
                 pauseGame();
                 document.getElementById('controls').style.display = 'block';
             }
         }
-        
-        function switchDimension() {
-            document.getElementById('controls').style.display = 'none';
-            activeDimension = (activeDimension % 3) + 1; // Cycle between 1, 2, 3
-        
-            // No need to change z-index or opacity here, it's handled in stepGame
-            startGame();
-        }
-        
 
         function startGame() {
+            clearInterval(interval);
             interval = setInterval(stepGame, propagationRate);
         }
 
@@ -171,45 +178,59 @@
             clearInterval(interval);
         }
 
-        // Function to randomly place a pattern on the grid
-        function addPattern(patternName) {
-            document.getElementById('controls').style.display = 'none';
+        function restartGame() {
+            pauseGame();
+            startGame();
+        }
+
+        // Initialize and start the game
+        initializeDimensions();
+        startGame();
+
+        // Expose necessary functions to the global scope
+        window.switchDimension = function() {
+            activeDimension = (activeDimension + 1) % numDimensions;
+        };
+
+        window.addDimension = function() {
+            if (numDimensions < colors.length) {
+                const newDimension = {
+                    grid: createGrid(),
+                    canvas: createCanvas(numDimensions),
+                    color: colors[numDimensions % colors.length]
+                };
+                dimensions.push(newDimension);
+                numDimensions++;
+            } else {
+                console.log("Maximum number of dimensions reached");
+            }
+        };
+
+        window.addPattern = function(patternName) {
             const pattern = patterns[patternName];
             const randX = Math.floor(Math.random() * (gridWidth - 5));
             const randY = Math.floor(Math.random() * (gridHeight - 5));
             
-            if (activeDimension === 1) {
-                pattern.forEach(([dx, dy]) => {
-                    grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
-                });
-            } else if (activeDimension === 2) {
-                pattern.forEach(([dx, dy]) => {
-                    dimensionGrid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
-                });
-            } else if (activeDimension === 3) {
-                pattern.forEach(([dx, dy]) => {
-                    thirdDimensionGrid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
-                });
-            }
+            pattern.forEach(([dx, dy]) => {
+                dimensions[activeDimension].grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
+            });
+            
+            drawGrid(dimensions[activeDimension]);
+            document.getElementById('controls').style.display = 'block';
             startGame();
-        }
+        };
 
-        function increasePropagation() {
-            document.getElementById('controls').style.display = 'none';
+        window.increasePropagation = function() {
             propagationRate = Math.max(50, propagationRate - 20); // Increase speed
-            startGame();
-        }
+            restartGame();
+        };
 
-        function increaseLifespan() {
-            document.getElementById('controls').style.display = 'none';
+        window.increaseLifespan = function() {
             lifespan += 5; // Increase time between evolutionary steps
-            startGame();
-        }
+            restartGame();
+        };
 
-
-        grid[24][24] = 1; // Seed the grid with a single live cell
-        drawGrid(grid, ctx, 'black');
-        startGame();
+    })();
     </script>
 </body>
 </html>
