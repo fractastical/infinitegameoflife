@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dimensional Conway's Game of Life</title>
+    <title>Multi-Dimensional Conway's Game of Life with Distinct Colors</title>
     <style>
         body {
             display: flex;
@@ -42,15 +42,22 @@
             margin-top: 20px;
             text-align: center;
         }
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
+    <div id="score">Score: 0</div>
+    
     <div id="gameContainer">
         <canvas id="gameCanvas" width="500" height="500"></canvas>
     </div>
     
     <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension v0.126</button>
+        <button onclick="switchDimension()">Switch Dimension v 0.128</button>
         <button onclick="addDimension()">Add Dimension</button>
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
@@ -85,14 +92,15 @@
         let propagationRate = 100; // Speed of evolution
         let lifespan = 20; // Steps between evolutionary options
         let interval;
+        let score = 0;
 
         const colors = [
-            'rgba(0, 0, 0, 1)',    // Black
-            'rgba(0, 0, 255, 1)',  // Blue
-            'rgba(128, 0, 128, 1)', // Purple
-            'rgba(255, 0, 0, 1)',  // Red
-            'rgba(0, 255, 0, 1)',  // Green
-            'rgba(255, 255, 0, 1)' // Yellow
+            'rgba(255, 0, 0, 1)',   // Red
+            'rgba(0, 255, 0, 1)',   // Green
+            'rgba(0, 0, 255, 1)',   // Blue
+            'rgba(255, 255, 0, 1)', // Yellow
+            'rgba(255, 0, 255, 1)', // Magenta
+            'rgba(0, 255, 255, 1)'  // Cyan
         ];
 
         const patterns = {
@@ -129,13 +137,17 @@
             return newCanvas;
         }
 
-        function drawGrid(dimension) {
+        function drawGrid(dimension, index) {
             const ctx = dimension.canvas.getContext('2d');
             ctx.clearRect(0, 0, dimension.canvas.width, dimension.canvas.height);
+            const baseColor = dimension.color;
+            const alpha = index === activeDimension ? 0.8 : 0.3;
+            const color = baseColor.replace('1)', `${alpha})`);
+            
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
                     if (dimension.grid[y][x] === 1) {
-                        ctx.fillStyle = dimension.color;
+                        ctx.fillStyle = color;
                         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                     }
                 }
@@ -166,13 +178,22 @@
             return sum - grid[y][x];
         }
 
+        function calculateScore() {
+            let totalLiveCells = 0;
+            dimensions.forEach(dimension => {
+                totalLiveCells += dimension.grid.flat().filter(cell => cell === 1).length;
+            });
+            score += totalLiveCells * numDimensions;
+            document.getElementById('score').textContent = `Score: ${score}`;
+        }
+
         function stepGame() {
             dimensions.forEach((dimension, index) => {
                 dimension.grid = nextGeneration(dimension.grid);
-                dimension.color = `rgba(${dimension.color.slice(5, -1)}, ${index === activeDimension ? 0.8 : 0.3})`;
-                drawGrid(dimension);
+                drawGrid(dimension, index);
             });
             steps++;
+            calculateScore();
         }
 
         function startGame() {
@@ -204,6 +225,7 @@
         // Expose necessary functions to the global scope
         window.switchDimension = function() {
             activeDimension = (activeDimension + 1) % numDimensions;
+            dimensions.forEach((dimension, index) => drawGrid(dimension, index));
             updateInfo();
         };
 
@@ -231,7 +253,7 @@
                 dimensions[activeDimension].grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
             });
             
-            drawGrid(dimensions[activeDimension]);
+            drawGrid(dimensions[activeDimension], activeDimension);
         };
 
         window.increasePropagation = function() {
