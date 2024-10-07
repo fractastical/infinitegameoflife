@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dimensional Conway's Game of Life with Age Absorption</title>
+    <title>Multi-Dimensional Conway's Game of Life (Max 7 Dimensions)</title>
     <style>
         body {
             display: flex;
@@ -42,22 +42,27 @@
             margin-top: 20px;
             text-align: center;
         }
-        #score {
+        #score, #timer {
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
+        }
+        #intervalScores {
+            margin-top: 20px;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <div id="score">Score: 0</div>
+    <div id="timer">Time: 00:00</div>
     
     <div id="gameContainer">
         <canvas id="gameCanvas" width="500" height="500"></canvas>
     </div>
     
     <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension v 0.129</button>
+        <button onclick="switchDimension()">Switch Dimension v.130</button>
         <button onclick="addDimension()">Add Dimension</button>
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
@@ -75,6 +80,8 @@
         <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
     </div>
 
+    <div id="intervalScores"></div>
+
     <script>
     (function() {
         const canvas = document.getElementById('gameCanvas');
@@ -87,6 +94,7 @@
         let dimensions = [];
         let activeDimension = 0;
         let numDimensions = 3;
+        const maxDimensions = 7;
 
         let steps = 0;
         let propagationRate = 100;
@@ -94,13 +102,20 @@
         let interval;
         let score = 0;
 
+        let startTime;
+        let timerInterval;
+        const scoreIntervals = [2, 5, 10]; // Minutes at which to record scores
+        let nextScoreInterval = 0;
+        const intervalScores = {};
+
         const colors = [
             'rgba(255, 0, 0, 1)',   // Red
             'rgba(0, 255, 0, 1)',   // Green
             'rgba(0, 0, 255, 1)',   // Blue
             'rgba(255, 255, 0, 1)', // Yellow
             'rgba(255, 0, 255, 1)', // Magenta
-            'rgba(0, 255, 255, 1)'  // Cyan
+            'rgba(0, 255, 255, 1)', // Cyan
+            'rgba(255, 128, 0, 1)'  // Orange
         ];
 
         const patterns = {
@@ -122,7 +137,7 @@
                 dimensions.push({
                     grid: createGrid(),
                     canvas: createCanvas(i),
-                    color: colors[i % colors.length]
+                    color: colors[i]
                 });
             }
         }
@@ -231,27 +246,69 @@
             }, 0);
         }
 
+        function updateTimer() {
+            const currentTime = new Date().getTime();
+            const elapsedTime = Math.floor((currentTime - startTime) / 1000); // in seconds
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            document.getElementById('timer').textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            // Check if we've reached a score interval
+            if (nextScoreInterval < scoreIntervals.length && minutes >= scoreIntervals[nextScoreInterval]) {
+                recordIntervalScore(scoreIntervals[nextScoreInterval]);
+                nextScoreInterval++;
+            }
+        }
+
+        function recordIntervalScore(minute) {
+            intervalScores[minute] = score;
+            updateIntervalScoresDisplay();
+        }
+
+        function updateIntervalScoresDisplay() {
+            const scoresDiv = document.getElementById('intervalScores');
+            scoresDiv.innerHTML = '<h3>Interval Scores:</h3>';
+            for (const [minute, score] of Object.entries(intervalScores)) {
+                scoresDiv.innerHTML += `<p>${minute} minute(s): ${Math.floor(score)}</p>`;
+            }
+        }
+
         function stepGame() {
             dimensions.forEach((dimension, index) => {
                 dimension.grid = nextGeneration(dimension.grid);
                 drawGrid(dimension, index);
             });
             steps++;
-            score = Math.floor(calculateScore(dimensions));
-            document.getElementById('score').textContent = `Score: ${score}`;
+            score = calculateScore(dimensions);
+            document.getElementById('score').textContent = `Score: ${Math.floor(score)}`;
         }
 
         function startGame() {
             clearInterval(interval);
             interval = setInterval(stepGame, propagationRate);
+            
+            if (!startTime) {
+                startTime = new Date().getTime();
+                timerInterval = setInterval(updateTimer, 1000);
+            }
         }
 
         function pauseGame() {
             clearInterval(interval);
+            clearInterval(timerInterval);
         }
 
         function restartGame() {
             pauseGame();
+            startTime = null;
+            nextScoreInterval = 0;
+            for (const key in intervalScores) {
+                delete intervalScores[key];
+            }
+            updateIntervalScoresDisplay();
+            score = 0;
+            document.getElementById('score').textContent = `Score: ${score}`;
+            document.getElementById('timer').textContent = 'Time: 00:00';
             startGame();
         }
 
@@ -273,11 +330,11 @@
         };
 
         window.addDimension = function() {
-            if (numDimensions < colors.length) {
+            if (numDimensions < maxDimensions) {
                 const newDimension = {
                     grid: createGrid(),
                     canvas: createCanvas(numDimensions),
-                    color: colors[numDimensions % colors.length]
+                    color: colors[numDimensions]
                 };
                 dimensions.push(newDimension);
                 numDimensions++;
@@ -299,8 +356,6 @@
             });
             
             drawGrid(dimensions[activeDimension], activeDimension);
-            score = Math.floor(calculateScore(dimensions));
-            document.getElementById('score').textContent = `Score: ${score}`;
         };
 
         window.increasePropagation = function() {
