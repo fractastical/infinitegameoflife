@@ -1,3 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Dimensional Conway's Game of Life with Distinct Colors</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            margin-top: 20px;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 1px solid #000;
+        }
+        #controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        #info {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
+    
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="500" height="500"></canvas>
+    </div>
+    
+    <div id="controls">
+        <button onclick="switchDimension()">Switch Dimension v 0.128</button>
+        <button onclick="addDimension()">Add Dimension</button>
+        <button onclick="addPattern('glider')">Add Glider</button>
+        <button onclick="addPattern('blinker')">Add Blinker</button>
+        <button onclick="addPattern('toad')">Add Toad</button>
+        <button onclick="addPattern('beacon')">Add Beacon</button>
+        <button onclick="addPattern('spaceship')">Add Spaceship</button>
+        <button onclick="increasePropagation()">Increase Propagation Rate</button>
+        <button onclick="increaseLifespan()">Increase Lifespan</button>
+    </div>
+
+    <div id="info">
+        <p>Active Dimension: <span id="activeDimensionDisplay">1</span></p>
+        <p>Total Dimensions: <span id="totalDimensionsDisplay">3</span></p>
+        <p>Propagation Rate: <span id="propagationRateDisplay">100</span> ms</p>
+        <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     (function() {
@@ -115,11 +192,15 @@
         }
 
         function calculateDimensionScores() {
-            dimensions.forEach((dimension, index) => {
-                const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
-                dimensionScores[index].push(liveCells); // Log score each minute
-            });
+        dimensions.forEach((dimension, index) => {
+            const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
+            dimensionScores[index].push(liveCells); // Log score each minute
+        });
+
+        // After calculating scores, display the updated chart
+        displayChart();
         }
+
 
         function stepGame() {
             dimensions.forEach((dimension, index) => {
@@ -135,7 +216,7 @@
             interval = setInterval(() => {
                 stepGame();
                 elapsedTime += propagationRate / 1000; // Increase time in seconds
-                if (elapsedTime % 60 === 0) calculateDimensionScores(); // Log every minute
+                if (elapsedTime % 60 === 0) calculateDimensionScores(); // Log every minute and display the chart
                 showTimeAlerts();
             }, propagationRate);
         }
@@ -148,7 +229,14 @@
 
         function displayChart() {
             const ctx = document.getElementById('scoreChart').getContext('2d');
-            new Chart(ctx, {
+            
+            // Clear the previous chart instance
+            if (window.scoreChartInstance) {
+                window.scoreChartInstance.destroy();
+            }
+
+            // Create a new chart instance
+            window.scoreChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: Array(dimensionScores[0].length).fill().map((_, i) => i + 1), // Minute markers
@@ -242,3 +330,7 @@
 </script>
 
 <canvas id="scoreChart" width="400" height="400"></canvas>
+</body>
+</html>
+
+
