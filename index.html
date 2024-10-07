@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,6 +84,10 @@
     <div id="intervalScores"></div>
 
     <script>
+=======
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+>>>>>>> Stashed changes
     (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -94,13 +99,18 @@
         let dimensions = [];
         let activeDimension = 0;
         let numDimensions = 3;
+<<<<<<< Updated upstream
         const maxDimensions = 7;
+=======
+>>>>>>> Stashed changes
 
         let steps = 0;
         let propagationRate = 100;
         let lifespan = 20;
         let interval;
         let score = 0;
+        let elapsedTime = 0; // Timer for tracking time
+        let dimensionScores = [];
 
         let startTime;
         let timerInterval;
@@ -109,6 +119,7 @@
         const intervalScores = {};
 
         const colors = [
+<<<<<<< Updated upstream
             'rgba(255, 0, 0, 1)',   // Red
             'rgba(0, 255, 0, 1)',   // Green
             'rgba(0, 0, 255, 1)',   // Blue
@@ -116,6 +127,14 @@
             'rgba(255, 0, 255, 1)', // Magenta
             'rgba(0, 255, 255, 1)', // Cyan
             'rgba(255, 128, 0, 1)'  // Orange
+=======
+            'rgba(255, 0, 0, 1)',  
+            'rgba(0, 255, 0, 1)',  
+            'rgba(0, 0, 255, 1)',  
+            'rgba(255, 255, 0, 1)',
+            'rgba(255, 0, 255, 1)',
+            'rgba(0, 255, 255, 1)' 
+>>>>>>> Stashed changes
         ];
 
         const patterns = {
@@ -139,6 +158,7 @@
                     canvas: createCanvas(i),
                     color: colors[i]
                 });
+                dimensionScores.push([]);  // Initialize score tracking for each dimension
             }
         }
 
@@ -273,6 +293,13 @@
             }
         }
 
+        function calculateDimensionScores() {
+            dimensions.forEach((dimension, index) => {
+                const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
+                dimensionScores[index].push(liveCells); // Log score each minute
+            });
+        }
+
         function stepGame() {
             dimensions.forEach((dimension, index) => {
                 dimension.grid = nextGeneration(dimension.grid);
@@ -285,12 +312,50 @@
 
         function startGame() {
             clearInterval(interval);
+<<<<<<< Updated upstream
             interval = setInterval(stepGame, propagationRate);
             
             if (!startTime) {
                 startTime = new Date().getTime();
                 timerInterval = setInterval(updateTimer, 1000);
             }
+=======
+            interval = setInterval(() => {
+                stepGame();
+                elapsedTime += propagationRate / 1000; // Increase time in seconds
+                if (elapsedTime % 60 === 0) calculateDimensionScores(); // Log every minute
+                showTimeAlerts();
+            }, propagationRate);
+        }
+
+        function showTimeAlerts() {
+            if (elapsedTime === 120 || elapsedTime === 300 || elapsedTime === 600 || elapsedTime === 1200) {
+                alert(`Time reached: ${elapsedTime / 60} minutes!`);
+            }
+        }
+
+        function displayChart() {
+            const ctx = document.getElementById('scoreChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(dimensionScores[0].length).fill().map((_, i) => i + 1), // Minute markers
+                    datasets: dimensions.map((dimension, index) => ({
+                        label: `Dimension ${index + 1}`,
+                        data: dimensionScores[index],
+                        borderColor: colors[index],
+                        fill: false
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Scores per Dimension Over Time'
+                    }
+                }
+            });
+>>>>>>> Stashed changes
         }
 
         function pauseGame() {
@@ -342,6 +407,7 @@
                     color: colors[numDimensions]
                 };
                 dimensions.push(newDimension);
+                dimensionScores.push([]); // Track scores for new dimension
                 numDimensions++;
                 updateInfo();
                 console.log(`Added new dimension. Total dimensions: ${numDimensions}`);
@@ -367,18 +433,34 @@
         };
 
         window.increasePropagation = function() {
+<<<<<<< Updated upstream
             propagationRate = Math.max(50, propagationRate - 20);
             console.log(`Propagation rate increased to ${propagationRate}ms`);
+=======
+            propagationRate = Math.max(50, propagationRate - 20); 
+>>>>>>> Stashed changes
             restartGame();
             updateInfo();
         };
 
         window.increaseLifespan = function() {
+<<<<<<< Updated upstream
             lifespan += 5;
             console.log(`Lifespan increased to ${lifespan}`);
+=======
+            lifespan += 5; 
+>>>>>>> Stashed changes
             updateInfo();
         };
 
+        window.displayChart = displayChart;
+
     })();
+<<<<<<< Updated upstream
     </script>
 </body>
+=======
+</script>
+
+<canvas id="scoreChart" width="400" height="400"></canvas>
+>>>>>>> Stashed changes
