@@ -84,15 +84,6 @@
             return arr;
         }
 
-        function drawGrid(grid, context, color) {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            for (let y = 0; y < gridHeight; y++) {
-                for (let x = 0; x < gridWidth; x++) {
-                    context.fillStyle = grid[y][x] === 1 ? color : 'white';
-                    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                }
-            }
-        }
 
         function nextGeneration(grid) {
             const newGrid = createGrid();
@@ -122,22 +113,53 @@
             return sum;
         }
 
+        function drawGrid(grid, context, color) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < gridHeight; y++) {
+                for (let x = 0; x < gridWidth; x++) {
+                    if (grid[y][x] === 1) {
+                        context.fillStyle = color;
+                        context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    }
+                }
+            }
+        }
+        
+        
         function stepGame() {
-            if (activeDimension === 1) {
+            if (activeDimension === 1 || activeDimension === 2) {
                 grid = nextGeneration(grid);
-                drawGrid(grid, ctx, 'black');
-            } else if (activeDimension === 2) {
+                drawGrid(grid, ctx, 'rgba(0, 0, 0, 0.8)');
+            }
+            if (activeDimension === 2 || activeDimension === 3) {
                 dimensionGrid = nextGeneration(dimensionGrid);
-                drawGrid(dimensionGrid, dimensionCtx, 'lightblue');
-            } else if (activeDimension === 3) {
+                drawGrid(dimensionGrid, dimensionCtx, 'rgba(0, 0, 255, 0.5)');
+            }
+            if (activeDimension === 1 || activeDimension === 3) {
                 thirdDimensionGrid = nextGeneration(thirdDimensionGrid);
-                drawGrid(thirdDimensionGrid, thirdCtx, 'lightpurple');
+                drawGrid(thirdDimensionGrid, thirdCtx, 'rgba(128, 0, 128, 0.5)');
             }
             steps++;
             if (steps % lifespan === 0) {
                 pauseGame();
                 document.getElementById('controls').style.display = 'block';
             }
+        }
+
+        function switchDimension() {
+            document.getElementById('controls').style.display = 'none';
+            activeDimension = (activeDimension % 3) + 1; // Cycle between 1, 2, 3
+        
+            canvas.style.zIndex = activeDimension === 1 ? "3" : "1";
+            dimensionCanvas.style.zIndex = activeDimension === 2 ? "3" : "2";
+            thirdCanvas.style.zIndex = activeDimension === 3 ? "3" : "1";
+        
+            // Clear all canvases
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dimensionCtx.clearRect(0, 0, canvas.width, canvas.height);
+            thirdCtx.clearRect(0, 0, canvas.width, canvas.height);
+        
+            startGame();
         }
 
         function startGame() {
@@ -183,17 +205,6 @@
             startGame();
         }
 
-        // Switch dimension and handle transparency
-        function switchDimension() {
-            document.getElementById('controls').style.display = 'none';
-            activeDimension = (activeDimension % 3) + 1; // Cycle between 1, 2, 3
-
-            canvas.style.opacity = activeDimension === 1 ? "1" : "0.2";
-            dimensionCanvas.style.opacity = activeDimension === 2 ? "1" : "0.2";
-            thirdCanvas.style.opacity = activeDimension === 3 ? "1" : "0.2";
-
-            startGame();
-        }
 
         grid[24][24] = 1; // Seed the grid with a single live cell
         drawGrid(grid, ctx, 'black');
