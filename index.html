@@ -3,34 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conway's Game of Life</title>
+    <title>Conway's Game of Life - Multidimensional</title>
     <style>
         canvas {
             border: 1px solid black;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         #controls {
             display: none;
+            position: absolute;
+            top: 10px;
+            left: 10px;
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas" width="500" height="500"></canvas>
+    <canvas id="dimensionCanvas" width="500" height="500" style="display:none;"></canvas>
+    
     <div id="controls">
         <button onclick="addGlider()">Add a Glider</button>
         <button onclick="increasePropagation()">Increase Propagation Rate</button>
         <button onclick="increaseLifespan()">Increase Lifespan</button>
+        <button onclick="switchDimension()">Switch Dimension</button>
     </div>
+    
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const dimensionCanvas = document.getElementById('dimensionCanvas');
+        const dimensionCtx = dimensionCanvas.getContext('2d');
+        
         const gridWidth = 50;
         const gridHeight = 50;
         const cellSize = canvas.width / gridWidth;
+        
         let grid = createGrid();
+        let dimensionGrid = createGrid();
         let steps = 0;
-        let interval;
         let propagationRate = 100; // Speed of evolution
         let lifespan = 20; // Steps between evolutionary options
+        let interval;
+        let inDimension = false;
 
         function createGrid() {
             let arr = new Array(gridHeight);
@@ -40,21 +56,17 @@
             return arr;
         }
 
-        function drawGrid(grid) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        function drawGrid(grid, context, color) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
-                    if (grid[y][x] === 1) {
-                        ctx.fillStyle = 'black';
-                    } else {
-                        ctx.fillStyle = 'white';
-                    }
-                    ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                    context.fillStyle = grid[y][x] === 1 ? color : 'white';
+                    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                 }
             }
         }
 
-        function nextGeneration() {
+        function nextGeneration(grid) {
             const newGrid = createGrid();
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
@@ -83,8 +95,13 @@
         }
 
         function stepGame() {
-            grid = nextGeneration();
-            drawGrid(grid);
+            if (!inDimension) {
+                grid = nextGeneration(grid);
+                drawGrid(grid, ctx, 'black');
+            } else {
+                dimensionGrid = nextGeneration(dimensionGrid);
+                drawGrid(dimensionGrid, dimensionCtx, 'lightblue');
+            }
             steps++;
             if (steps % lifespan === 0) {
                 pauseGame();
@@ -102,11 +119,19 @@
 
         function addGlider() {
             document.getElementById('controls').style.display = 'none';
-            grid[1][2] = 1;
-            grid[2][3] = 1;
-            grid[3][1] = 1;
-            grid[3][2] = 1;
-            grid[3][3] = 1;
+            if (!inDimension) {
+                grid[1][2] = 1;
+                grid[2][3] = 1;
+                grid[3][1] = 1;
+                grid[3][2] = 1;
+                grid[3][3] = 1;
+            } else {
+                dimensionGrid[1][2] = 1;
+                dimensionGrid[2][3] = 1;
+                dimensionGrid[3][1] = 1;
+                dimensionGrid[3][2] = 1;
+                dimensionGrid[3][3] = 1;
+            }
             startGame();
         }
 
@@ -122,8 +147,19 @@
             startGame();
         }
 
+        function switchDimension() {
+            document.getElementById('controls').style.display = 'none';
+            inDimension = !inDimension;
+            if (inDimension) {
+                dimensionCanvas.style.display = 'block';
+            } else {
+                dimensionCanvas.style.display = 'none';
+            }
+            startGame();
+        }
+
         grid[24][24] = 1; // Seed the grid with a single live cell
-        drawGrid(grid);
+        drawGrid(grid, ctx, 'black');
         startGame();
     </script>
 </body>
