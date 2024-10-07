@@ -1,108 +1,16 @@
-<<<<<<< Updated upstream
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dimensional Conway's Game of Life (Max 7 Dimensions)</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        #gameContainer {
-            position: relative;
-            width: 500px;
-            height: 500px;
-            margin-top: 20px;
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: 1px solid #000;
-        }
-        #controls {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        button {
-            padding: 5px 10px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #info {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #score, #timer {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        #intervalScores {
-            margin-top: 20px;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-    <div id="score">Score: 0</div>
-    <div id="timer">Time: 00:00</div>
-    
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="500" height="500"></canvas>
-    </div>
-    
-    <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension v.132</button>
-        <button onclick="addDimension()">Add Dimension</button>
-        <button onclick="addPattern('glider')">Add Glider</button>
-        <button onclick="addPattern('blinker')">Add Blinker</button>
-        <button onclick="addPattern('toad')">Add Toad</button>
-        <button onclick="addPattern('beacon')">Add Beacon</button>
-        <button onclick="addPattern('spaceship')">Add Spaceship</button>
-        <button onclick="increasePropagation()">Increase Propagation Rate</button>
-        <button onclick="increaseLifespan()">Increase Lifespan</button>
-    </div>
-
-    <div id="info">
-        <p>Active Dimension: <span id="activeDimensionDisplay">1</span></p>
-        <p>Total Dimensions: <span id="totalDimensionsDisplay">3</span></p>
-        <p>Propagation Rate: <span id="propagationRateDisplay">100</span> ms</p>
-        <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
-    </div>
-
-    <div id="intervalScores"></div>
-
-    <script>
-=======
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
->>>>>>> Stashed changes
     (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
         const gridWidth = 50;
         const gridHeight = 50;
-        const cellSize = Math.max(10, canvas.width / gridWidth);
+        const cellSize = canvas.width / gridWidth;
 
         let dimensions = [];
         let activeDimension = 0;
         let numDimensions = 3;
-<<<<<<< Updated upstream
-        const maxDimensions = 7;
-=======
->>>>>>> Stashed changes
 
         let steps = 0;
         let propagationRate = 100;
@@ -112,29 +20,13 @@
         let elapsedTime = 0; // Timer for tracking time
         let dimensionScores = [];
 
-        let startTime;
-        let timerInterval;
-        const scoreIntervals = [2, 5, 10]; // Minutes at which to record scores
-        let nextScoreInterval = 0;
-        const intervalScores = {};
-
         const colors = [
-<<<<<<< Updated upstream
-            'rgba(255, 0, 0, 1)',   // Red
-            'rgba(0, 255, 0, 1)',   // Green
-            'rgba(0, 0, 255, 1)',   // Blue
-            'rgba(255, 255, 0, 1)', // Yellow
-            'rgba(255, 0, 255, 1)', // Magenta
-            'rgba(0, 255, 255, 1)', // Cyan
-            'rgba(255, 128, 0, 1)'  // Orange
-=======
             'rgba(255, 0, 0, 1)',  
             'rgba(0, 255, 0, 1)',  
             'rgba(0, 0, 255, 1)',  
             'rgba(255, 255, 0, 1)',
             'rgba(255, 0, 255, 1)',
             'rgba(0, 255, 255, 1)' 
->>>>>>> Stashed changes
         ];
 
         const patterns = {
@@ -145,21 +37,19 @@
             spaceship: [[0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 3], [3, 0], [3, 2]]
         };
 
-        function createGrid() {
-            return Array(gridHeight).fill().map(() => 
-                Array(gridWidth).fill().map(() => ({ alive: false, age: 0 }))
-            );
-        }
-
         function initializeDimensions() {
             for (let i = 0; i < numDimensions; i++) {
                 dimensions.push({
                     grid: createGrid(),
                     canvas: createCanvas(i),
-                    color: colors[i]
+                    color: colors[i % colors.length]
                 });
                 dimensionScores.push([]);  // Initialize score tracking for each dimension
             }
+        }
+
+        function createGrid() {
+            return Array(gridHeight).fill().map(() => Array(gridWidth).fill(0));
         }
 
         function createCanvas(index) {
@@ -179,23 +69,13 @@
             ctx.clearRect(0, 0, dimension.canvas.width, dimension.canvas.height);
             const baseColor = dimension.color;
             const alpha = index === activeDimension ? 0.8 : 0.3;
+            const color = baseColor.replace('1)', `${alpha})`);
             
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
-                    const cell = dimension.grid[y][x];
-                    if (cell.alive) {
-                        const ageAlpha = Math.min(1, cell.age / 200);
-                        const ageHue = (cell.age * 2) % 360;
-                        ctx.fillStyle = `hsla(${ageHue}, 100%, 50%, ${alpha * ageAlpha})`;
+                    if (dimension.grid[y][x] === 1) {
+                        ctx.fillStyle = color;
                         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                        
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                        ctx.font = `${Math.max(8, cellSize / 3)}px Arial`;
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        
-                        const displayAge = cell.age > 999 ? '999+' : cell.age.toString();
-                        ctx.fillText(displayAge, (x + 0.5) * cellSize, (y + 0.5) * cellSize);
                     }
                 }
             }
@@ -203,42 +83,13 @@
 
         function nextGeneration(grid) {
             const newGrid = createGrid();
-            const dyingCells = [];
-
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
                     const neighbors = countNeighbors(grid, x, y);
-                    const currentCell = grid[y][x];
-                    if (currentCell.alive) {
-                        if (neighbors === 2 || neighbors === 3) {
-                            newGrid[y][x] = { alive: true, age: currentCell.age + 1 };
-                        } else {
-                            dyingCells.push({x, y, age: currentCell.age});
-                            newGrid[y][x] = { alive: false, age: 0 };
-                        }
-                    } else {
-                        if (neighbors === 3) {
-                            newGrid[y][x] = { alive: true, age: 1 };
-                        } else {
-                            newGrid[y][x] = { alive: false, age: 0 };
-                        }
-                    }
+                    newGrid[y][x] = (grid[y][x] === 1 && (neighbors === 2 || neighbors === 3)) || 
+                                     (grid[y][x] === 0 && neighbors === 3) ? 1 : 0;
                 }
             }
-
-            dyingCells.forEach(dyingCell => {
-                for (let i = -1; i <= 1; i++) {
-                    for (let j = -1; j <= 1; j++) {
-                        if (i === 0 && j === 0) continue;
-                        const col = (dyingCell.x + i + gridWidth) % gridWidth;
-                        const row = (dyingCell.y + j + gridHeight) % gridHeight;
-                        if (newGrid[row][col].alive) {
-                            newGrid[row][col].age += Math.floor(dyingCell.age / 8);
-                        }
-                    }
-                }
-            });
-
             return newGrid;
         }
 
@@ -246,51 +97,21 @@
             let sum = 0;
             for (let i = -1; i <= 1; i++) {
                 for (let j = -1; j <= 1; j++) {
-                    if (i === 0 && j === 0) continue;
                     const col = (x + i + gridWidth) % gridWidth;
                     const row = (y + j + gridHeight) % gridHeight;
-                    sum += grid[row][col].alive ? 1 : 0;
+                    sum += grid[row][col];
                 }
             }
-            return sum;
+            return sum - grid[y][x];
         }
 
-        function calculateScore(dimensions) {
-            return dimensions.reduce((totalScore, dimension) => {
-                return totalScore + dimension.grid.flat().reduce((sum, cell) => {
-                    if (cell.alive) {
-                        return sum + Math.pow(cell.age, 1.5);
-                    }
-                    return sum;
-                }, 0);
-            }, 0);
-        }
-
-        function updateTimer() {
-            const currentTime = new Date().getTime();
-            const elapsedTime = Math.floor((currentTime - startTime) / 1000); // in seconds
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            document.getElementById('timer').textContent = `Time: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-            // Check if we've reached a score interval
-            if (nextScoreInterval < scoreIntervals.length && minutes >= scoreIntervals[nextScoreInterval]) {
-                recordIntervalScore(scoreIntervals[nextScoreInterval]);
-                nextScoreInterval++;
-            }
-        }
-
-        function recordIntervalScore(minute) {
-            intervalScores[minute] = score;
-            updateIntervalScoresDisplay();
-        }
-
-        function updateIntervalScoresDisplay() {
-            const scoresDiv = document.getElementById('intervalScores');
-            scoresDiv.innerHTML = '<h3>Interval Scores:</h3>';
-            for (const [minute, score] of Object.entries(intervalScores)) {
-                scoresDiv.innerHTML += `<p>${minute} minute(s): ${Math.floor(score)}</p>`;
-            }
+        function calculateScore() {
+            let totalLiveCells = 0;
+            dimensions.forEach(dimension => {
+                totalLiveCells += dimension.grid.flat().filter(cell => cell === 1).length;
+            });
+            score += totalLiveCells * numDimensions;
+            document.getElementById('score').textContent = `Score: ${score}`;
         }
 
         function calculateDimensionScores() {
@@ -306,20 +127,11 @@
                 drawGrid(dimension, index);
             });
             steps++;
-            score = calculateScore(dimensions);
-            document.getElementById('score').textContent = `Score: ${Math.floor(score)}`;
+            calculateScore();
         }
 
         function startGame() {
             clearInterval(interval);
-<<<<<<< Updated upstream
-            interval = setInterval(stepGame, propagationRate);
-            
-            if (!startTime) {
-                startTime = new Date().getTime();
-                timerInterval = setInterval(updateTimer, 1000);
-            }
-=======
             interval = setInterval(() => {
                 stepGame();
                 elapsedTime += propagationRate / 1000; // Increase time in seconds
@@ -355,29 +167,14 @@
                     }
                 }
             });
->>>>>>> Stashed changes
         }
 
         function pauseGame() {
             clearInterval(interval);
-            clearInterval(timerInterval);
         }
 
         function restartGame() {
             pauseGame();
-            dimensions.forEach(dimension => {
-                dimension.grid = createGrid();
-                drawGrid(dimension, dimensions.indexOf(dimension));
-            });
-            startTime = null;
-            nextScoreInterval = 0;
-            for (const key in intervalScores) {
-                delete intervalScores[key];
-            }
-            updateIntervalScoresDisplay();
-            score = 0;
-            document.getElementById('score').textContent = `Score: ${score}`;
-            document.getElementById('timer').textContent = 'Time: 00:00';
             startGame();
         }
 
@@ -388,79 +185,60 @@
             document.getElementById('lifespanDisplay').textContent = lifespan;
         }
 
+        // Initialize and start the game
         initializeDimensions();
         startGame();
         updateInfo();
 
+        // Expose necessary functions to the global scope
         window.switchDimension = function() {
             activeDimension = (activeDimension + 1) % numDimensions;
             dimensions.forEach((dimension, index) => drawGrid(dimension, index));
             updateInfo();
-            console.log(`Switched to dimension ${activeDimension + 1}`);
         };
 
         window.addDimension = function() {
-            if (numDimensions < maxDimensions) {
+            if (numDimensions < colors.length) {
                 const newDimension = {
                     grid: createGrid(),
                     canvas: createCanvas(numDimensions),
-                    color: colors[numDimensions]
+                    color: colors[numDimensions % colors.length]
                 };
                 dimensions.push(newDimension);
                 dimensionScores.push([]); // Track scores for new dimension
                 numDimensions++;
                 updateInfo();
-                console.log(`Added new dimension. Total dimensions: ${numDimensions}`);
             } else {
                 alert("Maximum number of dimensions reached");
             }
         };
 
         window.addPattern = function(patternName) {
-            console.log(`Adding pattern: ${patternName}`);
             const pattern = patterns[patternName];
             const randX = Math.floor(Math.random() * (gridWidth - 5));
             const randY = Math.floor(Math.random() * (gridHeight - 5));
             
             pattern.forEach(([dx, dy]) => {
-                const x = (randX + dx) % gridWidth;
-                const y = (randY + dy) % gridHeight;
-                dimensions[activeDimension].grid[y][x] = { alive: true, age: 1 };
+                dimensions[activeDimension].grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
             });
             
-            console.log(`Pattern added at (${randX}, ${randY}) in dimension ${activeDimension + 1}`);
             drawGrid(dimensions[activeDimension], activeDimension);
         };
 
         window.increasePropagation = function() {
-<<<<<<< Updated upstream
-            propagationRate = Math.max(50, propagationRate - 20);
-            console.log(`Propagation rate increased to ${propagationRate}ms`);
-=======
             propagationRate = Math.max(50, propagationRate - 20); 
->>>>>>> Stashed changes
             restartGame();
             updateInfo();
         };
 
         window.increaseLifespan = function() {
-<<<<<<< Updated upstream
-            lifespan += 5;
-            console.log(`Lifespan increased to ${lifespan}`);
-=======
             lifespan += 5; 
->>>>>>> Stashed changes
             updateInfo();
         };
 
         window.displayChart = displayChart;
 
     })();
-<<<<<<< Updated upstream
-    </script>
-</body>
-=======
 </script>
 
 <canvas id="scoreChart" width="400" height="400"></canvas>
->>>>>>> Stashed changes
