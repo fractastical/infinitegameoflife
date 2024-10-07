@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Dimensional Conway's Game of Life with Distinct Colors</title>
+    <title>Multi-Dimensional Conway's Game of Life with Age Absorption</title>
     <style>
         body {
             display: flex;
@@ -57,7 +57,7 @@
     </div>
     
     <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension v 0.128</button>
+        <button onclick="switchDimension()">Switch Dimension</button>
         <button onclick="addDimension()">Add Dimension</button>
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
@@ -82,15 +82,15 @@
 
         const gridWidth = 50;
         const gridHeight = 50;
-        const cellSize = canvas.width / gridWidth;
+        const cellSize = Math.max(10, canvas.width / gridWidth);
 
-        let dimensions = []; // Array to hold all dimension grids
+        let dimensions = [];
         let activeDimension = 0;
-        let numDimensions = 3; // Start with 3 dimensions, can be changed
+        let numDimensions = 3;
 
         let steps = 0;
-        let propagationRate = 100; // Speed of evolution
-        let lifespan = 20; // Steps between evolutionary options
+        let propagationRate = 100;
+        let lifespan = 20;
         let interval;
         let score = 0;
 
@@ -111,6 +111,12 @@
             spaceship: [[0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 3], [3, 0], [3, 2]]
         };
 
+        function createGrid() {
+            return Array(gridHeight).fill().map(() => 
+                Array(gridWidth).fill().map(() => ({ alive: false, age: 0 }))
+            );
+        }
+
         function initializeDimensions() {
             for (let i = 0; i < numDimensions; i++) {
                 dimensions.push({
@@ -119,10 +125,6 @@
                     color: colors[i % colors.length]
                 });
             }
-        }
-
-        function createGrid() {
-            return Array(gridHeight).fill().map(() => Array(gridWidth).fill(0));
         }
 
         function createCanvas(index) {
@@ -142,13 +144,23 @@
             ctx.clearRect(0, 0, dimension.canvas.width, dimension.canvas.height);
             const baseColor = dimension.color;
             const alpha = index === activeDimension ? 0.8 : 0.3;
-            const color = baseColor.replace('1)', `${alpha})`);
             
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
-                    if (dimension.grid[y][x] === 1) {
-                        ctx.fillStyle = color;
+                    const cell = dimension.grid[y][x];
+                    if (cell.alive) {
+                        const ageAlpha = Math.min(1, cell.age / 200);
+                        const ageHue = (cell.age * 2) % 360;
+                        ctx.fillStyle = `hsla(${ageHue}, 100%, 50%, ${alpha * ageAlpha})`;
                         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                        
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.font = `${Math.max(8, cellSize / 3)}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        const displayAge = cell.age > 999 ? '999+' : cell.age.toString();
+                        ctx.fillText(displayAge, (x + 0.5) * cellSize, (y + 0.5) * cellSize);
                     }
                 }
             }
@@ -156,13 +168,42 @@
 
         function nextGeneration(grid) {
             const newGrid = createGrid();
+            const dyingCells = [];
+
             for (let y = 0; y < gridHeight; y++) {
                 for (let x = 0; x < gridWidth; x++) {
                     const neighbors = countNeighbors(grid, x, y);
-                    newGrid[y][x] = (grid[y][x] === 1 && (neighbors === 2 || neighbors === 3)) || 
-                                     (grid[y][x] === 0 && neighbors === 3) ? 1 : 0;
+                    const currentCell = grid[y][x];
+                    if (currentCell.alive) {
+                        if (neighbors < 2 || neighbors > 3) {
+                            dyingCells.push({x, y, age: currentCell.age});
+                            newGrid[y][x] = { alive: false, age: 0 };
+                        } else {
+                            newGrid[y][x] = { alive: true, age: currentCell.age + 1 };
+                        }
+                    } else {
+                        if (neighbors === 3) {
+                            newGrid[y][x] = { alive: true, age: 1 };
+                        } else {
+                            newGrid[y][x] = { alive: false, age: 0 };
+                        }
+                    }
                 }
             }
+
+            dyingCells.forEach(dyingCell => {
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        if (i === 0 && j === 0) continue;
+                        const col = (dyingCell.x + i + gridWidth) % gridWidth;
+                        const row = (dyingCell.y + j + gridHeight) % gridHeight;
+                        if (newGrid[row][col].alive) {
+                            newGrid[row][col].age += Math.floor(dyingCell.age / 8);
+                        }
+                    }
+                }
+            });
+
             return newGrid;
         }
 
@@ -170,21 +211,24 @@
             let sum = 0;
             for (let i = -1; i <= 1; i++) {
                 for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
                     const col = (x + i + gridWidth) % gridWidth;
                     const row = (y + j + gridHeight) % gridHeight;
-                    sum += grid[row][col];
+                    sum += grid[row][col].alive ? 1 : 0;
                 }
             }
-            return sum - grid[y][x];
+            return sum;
         }
 
-        function calculateScore() {
-            let totalLiveCells = 0;
-            dimensions.forEach(dimension => {
-                totalLiveCells += dimension.grid.flat().filter(cell => cell === 1).length;
-            });
-            score += totalLiveCells * numDimensions;
-            document.getElementById('score').textContent = `Score: ${score}`;
+        function calculateScore(dimensions) {
+            return dimensions.reduce((totalScore, dimension) => {
+                return totalScore + dimension.grid.flat().reduce((sum, cell) => {
+                    if (cell.alive) {
+                        return sum + Math.pow(cell.age, 1.5);
+                    }
+                    return sum;
+                }, 0);
+            }, 0);
         }
 
         function stepGame() {
@@ -193,7 +237,8 @@
                 drawGrid(dimension, index);
             });
             steps++;
-            calculateScore();
+            score = Math.floor(calculateScore(dimensions));
+            document.getElementById('score').textContent = `Score: ${score}`;
         }
 
         function startGame() {
@@ -217,12 +262,10 @@
             document.getElementById('lifespanDisplay').textContent = lifespan;
         }
 
-        // Initialize and start the game
         initializeDimensions();
         startGame();
         updateInfo();
 
-        // Expose necessary functions to the global scope
         window.switchDimension = function() {
             activeDimension = (activeDimension + 1) % numDimensions;
             dimensions.forEach((dimension, index) => drawGrid(dimension, index));
@@ -250,20 +293,24 @@
             const randY = Math.floor(Math.random() * (gridHeight - 5));
             
             pattern.forEach(([dx, dy]) => {
-                dimensions[activeDimension].grid[(randY + dy) % gridHeight][(randX + dx) % gridWidth] = 1;
+                const x = (randX + dx) % gridWidth;
+                const y = (randY + dy) % gridHeight;
+                dimensions[activeDimension].grid[y][x] = { alive: true, age: 1 };
             });
             
             drawGrid(dimensions[activeDimension], activeDimension);
+            score = Math.floor(calculateScore(dimensions));
+            document.getElementById('score').textContent = `Score: ${score}`;
         };
 
         window.increasePropagation = function() {
-            propagationRate = Math.max(50, propagationRate - 20); // Increase speed
+            propagationRate = Math.max(50, propagationRate - 20);
             restartGame();
             updateInfo();
         };
 
         window.increaseLifespan = function() {
-            lifespan += 5; // Increase time between evolutionary steps
+            lifespan += 5;
             updateInfo();
         };
 
