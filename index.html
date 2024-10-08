@@ -9,16 +9,22 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
+        }
+        #score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
         #gameContainer {
             position: relative;
             width: 500px;
             height: 500px;
-            margin-top: 20px;
+            margin-bottom: 20px;
         }
         canvas {
             position: absolute;
@@ -27,11 +33,12 @@
             border: 1px solid #000;
         }
         #controls {
-            margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             gap: 10px;
+            margin-bottom: 20px;
+            max-width: 500px;
         }
         button {
             padding: 5px 10px;
@@ -39,14 +46,15 @@
             cursor: pointer;
         }
         #info {
-            margin-top: 20px;
             text-align: center;
+            margin-bottom: 20px;
         }
-        #score {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        #chartContainer {
+            width: 500px;
+            height: 400px;
+            margin-top: 20px;
         }
+
     </style>
 </head>
 <body>
@@ -76,6 +84,11 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div id="chartContainer">
+        <canvas id="scoreChart"></canvas>
+    </div>
+
 <script>
     (function() {
         const canvas = document.getElementById('gameCanvas');
@@ -87,7 +100,7 @@
 
         let dimensions = [];
         let activeDimension = 0;
-        let numDimensions = 3;
+        let numDimensions = 7;
 
         let steps = 0;
         let propagationRate = 100;
@@ -194,6 +207,7 @@
         function calculateDimensionScores() {
         dimensions.forEach((dimension, index) => {
             const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
+            console.log(liveCells);
             dimensionScores[index].push(liveCells); // Log score each minute
         });
 
@@ -211,15 +225,23 @@
             calculateScore();
         }
 
-        function startGame() {
+            function startGame() {
+            let minuteCounter = 0; // Track full minutes
+
             clearInterval(interval);
             interval = setInterval(() => {
                 stepGame();
                 elapsedTime += propagationRate / 1000; // Increase time in seconds
-                if (elapsedTime % 60 === 0) calculateDimensionScores(); // Log every minute and display the chart
+                
+                // Check if a full minute has passed
+                if (elapsedTime >= (minuteCounter + 1) * 5) {
+                    calculateDimensionScores(); // Log every minute and update the chart
+                    minuteCounter++;
+                }
+                
                 showTimeAlerts();
             }, propagationRate);
-        }
+            }
 
         function showTimeAlerts() {
             if (elapsedTime === 120 || elapsedTime === 300 || elapsedTime === 600 || elapsedTime === 1200) {
@@ -277,6 +299,7 @@
         initializeDimensions();
         startGame();
         updateInfo();
+        displayChart();
 
         // Expose necessary functions to the global scope
         window.switchDimension = function() {
@@ -329,7 +352,6 @@
     })();
 </script>
 
-<canvas id="scoreChart" width="400" height="400"></canvas>
 </body>
 </html>
 
