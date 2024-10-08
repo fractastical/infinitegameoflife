@@ -54,13 +54,58 @@
             height: 400px;
             margin-top: 20px;
         }
+        /* Right Sidebar Styles */
+        #sidebar {
+            position: fixed;
+            right: -300px;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            transition: 0.3s ease;
+            z-index: 9999;
+        }
 
+        #sidebar.open {
+            right: 0;
+        }
+
+        #closeBtn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            cursor: pointer;
+        }
+
+        #openSidebarBtn {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px 0 0 5px;
+            z-index: 9998;
+        }
+
+        #sidebar h3 {
+            margin-top: 20px;
+        }
+
+        #sidebar img {
+            width: 100%;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div id="score">Score: 0</div>
     <div id="milestoneScores">
-        <p>Score after 30 seconds: <span id="scorehalfmin">Not reached</span></p>
         <p>Score after 2 minutes: <span id="score2min">Not reached</span></p>
         <p>Score after 5 minutes: <span id="score5min">Not reached</span></p>
         <p>Score after 10 minutes: <span id="score10min">Not reached</span></p>
@@ -73,12 +118,18 @@
     
     <div id="controls">
         <button onclick="switchDimension()">Switch Dimension v 0.128</button>
-        <!-- <button onclick="addDimension()">Add Dimension</button> -->
+        <button onclick="addDimension()">Add Dimension</button>
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
         <button onclick="addPattern('toad')">Add Toad</button>
         <button onclick="addPattern('beacon')">Add Beacon</button>
-        <button onclick="addPattern('spaceship')">Add Spaceship</button>
+        <button onclick="addPattern('block')">Add Block</button> <!-- New pattern -->
+        <button onclick="addPattern('beehive')">Add Beehive</button> <!-- New pattern -->
+        <button onclick="addPattern('loaf')">Add Loaf</button> <!-- New pattern -->
+        <button onclick="addPattern('boat')">Add Boat</button> <!-- New pattern -->
+        <button onclick="addPattern('pulsar')">Add Pulsar</button> <!-- New pattern -->
+        <button onclick="addPattern('glidergun')">Add Glider Gun</button> <!-- New pattern -->
+        <button onclick="addPattern('r_pentomino')">Add R-pentomino</button> <!-- New pattern -->
         <button onclick="increasePropagation()">Increase Propagation Rate</button>
         <button onclick="increaseLifespan()">Increase Lifespan</button>
     </div>
@@ -90,6 +141,45 @@
         <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
     </div>
 
+    <div id="openSidebarBtn">Patterns</div>
+
+    <div id="sidebar">
+        <div id="closeBtn">X</div>
+        <h2>Game of Life Patterns</h2>
+
+        <h3>Glider</h3>
+        <p>The glider is a small, self-propagating pattern.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Game_of_life_animated_glider.gif" alt="Glider">
+
+        <h3>Block</h3>
+        <p>The block is a simple still life that remains stable over time.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Game_of_life_block.png" alt="Block">
+
+        <h3>Beehive</h3>
+        <p>The beehive is another stable pattern that doesn’t change over time.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/8/8b/Game_of_life_beehive.png" alt="Beehive">
+
+        <h3>Loaf</h3>
+        <p>The loaf is a still life that remains unchanged throughout the game.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/d/dc/Game_of_life_loaf.png" alt="Loaf">
+
+        <h3>Boat</h3>
+        <p>The boat is a stable still life pattern.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/37/Game_of_life_boat.png" alt="Boat">
+
+        <h3>Pulsar</h3>
+        <p>The pulsar is a large, symmetric oscillator with a period of 3.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/07/Game_of_life_pulsar.gif" alt="Pulsar">
+
+        <h3>Glider Gun</h3>
+        <p>The glider gun generates new gliders periodically.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/37/Game_of_life_glider_gun.gif" alt="Glider Gun">
+
+        <h3>R-pentomino</h3>
+        <p>The R-pentomino is a methuselah pattern that evolves unpredictably.</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1c/Game_of_life_rpentomino.gif" alt="R-pentomino">
+    </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <div id="chartContainer">
@@ -97,6 +187,16 @@
     </div>
 
 <script>
+    // Function to open the sidebar
+    document.getElementById('openSidebarBtn').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.add('open');
+    });
+
+    // Function to close the sidebar
+    document.getElementById('closeBtn').addEventListener('click', function() {
+        document.getElementById('sidebar').classList.remove('open');
+    });
+
     (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -117,7 +217,6 @@
         let elapsedTime = 0; // Timer for tracking time
         let dimensionScores = [];
 
-        let scoreAtHalfMinute = null;
         let scoreAt2Minutes = null;
         let scoreAt5Minutes = null;
         let scoreAt10Minutes = null;
@@ -137,7 +236,13 @@
             blinker: [[0, 1], [1, 1], [2, 1]],
             toad: [[1, 0], [1, 1], [1, 2], [2, 1], [2, 2], [2, 3]],
             beacon: [[0, 0], [0, 1], [1, 0], [1, 1], [2, 2], [2, 3], [3, 2], [3, 3]],
-            spaceship: [[0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [2, 3], [3, 0], [3, 2]]
+            block: [[0, 0], [0, 1], [1, 0], [1, 1]],
+            beehive: [[0, 1], [1, 0], [1, 2], [2, 1]],
+            loaf: [[0, 1], [1, 0], [1, 2], [2, 1], [2, 3], [3, 2]],
+            boat: [[0, 0], [0, 1], [1, 0], [1, 2], [2, 1]],
+            pulsar: [[0, 2], [0, 3], [0, 4], [0, 8], [0, 9], [0, 10], [2, 0], [3, 0], [4, 0], [8, 0], [9, 0], [10, 0], [2, 5], [3, 5], [4, 5], [8, 5], [9, 5], [10, 5], [2, 7], [3, 7], [4, 7], [8, 7], [9, 7], [10, 7], [2, 12], [3, 12], [4, 12], [8, 12], [9, 12], [10, 12], [5, 2], [5, 3], [5, 4], [5, 8], [5, 9], [5, 10], [7, 2], [7, 3], [7, 4], [7, 8], [7, 9], [7, 10]],
+            glidergun: [[5, 1], [5, 2], [6, 1], [6, 2], [5, 11], [6, 11], [7, 11], [4, 12], [8, 12], [3, 13], [9, 13], [3, 14], [9, 14], [6, 15], [4, 16], [8, 16], [5, 17], [6, 17], [7, 17], [6, 18], [3, 21], [4, 21], [5, 21], [3, 22], [4, 22], [5, 22], [2, 23], [6, 23], [1, 25], [2, 25], [6, 25], [7, 25]],
+            r_pentomino: [[0, 1], [0, 2], [1, 0], [1, 1], [2, 1]]
         };
 
         function initializeDimensions() {
@@ -243,9 +348,9 @@
             interval = setInterval(() => {
                 stepGame();
                 elapsedTime += propagationRate / 1000; // Increase time in seconds
-                console.log(elapsedTime);
+                
                 // Check if a full minute has passed
-                if (elapsedTime >= (minuteCounter + 1) * 10) {
+                if (elapsedTime >= (minuteCounter + 1) * 60) {
                     calculateDimensionScores(); // Log every minute and update the chart
                     minuteCounter++;
                 }
@@ -255,12 +360,6 @@
         }
 
         function showTimeAlerts() {
-
-            if (elapsedTime >= 30 && scoreAtHalfMinute === null) {
-                scoreAtHalfMinute = score;
-                document.getElementById('scorehalfmin').textContent = scoreAtHalfMinute;
-            }
-
             if (elapsedTime >= 120 && scoreAt2Minutes === null) {
                 scoreAt2Minutes = score;
                 document.getElementById('score2min').textContent = scoreAt2Minutes;
