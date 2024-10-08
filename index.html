@@ -59,6 +59,13 @@
 </head>
 <body>
     <div id="score">Score: 0</div>
+    <div id="milestoneScores">
+        <p>Score after 30 seconds: <span id="scorehalfmin">Not reached</span></p>
+        <p>Score after 2 minutes: <span id="score2min">Not reached</span></p>
+        <p>Score after 5 minutes: <span id="score5min">Not reached</span></p>
+        <p>Score after 10 minutes: <span id="score10min">Not reached</span></p>
+        <p>Score after 20 minutes: <span id="score20min">Not reached</span></p>
+    </div>
     
     <div id="gameContainer">
         <canvas id="gameCanvas" width="500" height="500"></canvas>
@@ -66,7 +73,7 @@
     
     <div id="controls">
         <button onclick="switchDimension()">Switch Dimension v 0.128</button>
-        <button onclick="addDimension()">Add Dimension</button>
+        <!-- <button onclick="addDimension()">Add Dimension</button> -->
         <button onclick="addPattern('glider')">Add Glider</button>
         <button onclick="addPattern('blinker')">Add Blinker</button>
         <button onclick="addPattern('toad')">Add Toad</button>
@@ -109,6 +116,12 @@
         let score = 0;
         let elapsedTime = 0; // Timer for tracking time
         let dimensionScores = [];
+
+        let scoreAtHalfMinute = null;
+        let scoreAt2Minutes = null;
+        let scoreAt5Minutes = null;
+        let scoreAt10Minutes = null;
+        let scoreAt20Minutes = null;
 
         const colors = [
             'rgba(255, 0, 0, 1)',  
@@ -205,16 +218,14 @@
         }
 
         function calculateDimensionScores() {
-        dimensions.forEach((dimension, index) => {
-            const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
-            console.log(liveCells);
-            dimensionScores[index].push(liveCells); // Log score each minute
-        });
+            dimensions.forEach((dimension, index) => {
+                const liveCells = dimension.grid.flat().filter(cell => cell === 1).length;
+                dimensionScores[index].push(liveCells); // Log score each minute
+            });
 
-        // After calculating scores, display the updated chart
-        displayChart();
+            // After calculating scores, display the updated chart
+            displayChart();
         }
-
 
         function stepGame() {
             dimensions.forEach((dimension, index) => {
@@ -225,27 +236,46 @@
             calculateScore();
         }
 
-            function startGame() {
+        function startGame() {
             let minuteCounter = 0; // Track full minutes
 
             clearInterval(interval);
             interval = setInterval(() => {
                 stepGame();
                 elapsedTime += propagationRate / 1000; // Increase time in seconds
-                
+                console.log(elapsedTime);
                 // Check if a full minute has passed
-                if (elapsedTime >= (minuteCounter + 1) * 5) {
+                if (elapsedTime >= (minuteCounter + 1) * 10) {
                     calculateDimensionScores(); // Log every minute and update the chart
                     minuteCounter++;
                 }
                 
                 showTimeAlerts();
             }, propagationRate);
-            }
+        }
 
         function showTimeAlerts() {
-            if (elapsedTime === 120 || elapsedTime === 300 || elapsedTime === 600 || elapsedTime === 1200) {
-                alert(`Time reached: ${elapsedTime / 60} minutes!`);
+
+            if (elapsedTime >= 30 && scoreAtHalfMinute === null) {
+                scoreAtHalfMinute = score;
+                document.getElementById('scorehalfmin').textContent = scoreAtHalfMinute;
+            }
+
+            if (elapsedTime >= 120 && scoreAt2Minutes === null) {
+                scoreAt2Minutes = score;
+                document.getElementById('score2min').textContent = scoreAt2Minutes;
+            }
+            if (elapsedTime >= 300 && scoreAt5Minutes === null) {
+                scoreAt5Minutes = score;
+                document.getElementById('score5min').textContent = scoreAt5Minutes;
+            }
+            if (elapsedTime >= 600 && scoreAt10Minutes === null) {
+                scoreAt10Minutes = score;
+                document.getElementById('score10min').textContent = scoreAt10Minutes;
+            }
+            if (elapsedTime >= 1200 && scoreAt20Minutes === null) {
+                scoreAt20Minutes = score;
+                document.getElementById('score20min').textContent = scoreAt20Minutes;
             }
         }
 
@@ -354,5 +384,3 @@
 
 </body>
 </html>
-
-
