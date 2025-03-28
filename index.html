@@ -811,13 +811,13 @@ function displayChart() {
     }
 
     // Generate minute labels
-    const minutes = dimensionScores[0]?.map((_, i) => `Min ${i + 1}`) || [];
+const labels = dimensionScores[0]?.map((_, i) => `${(i + 1) * 10}s`) || [];
 
     // Create new chart instance
     window.scoreChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: minutes,
+            labels: labels,
             datasets: dimensions.map((dimension, index) => ({
                 label: `Dimension ${index + 1}`,
                 data: dimensionScores[index],
@@ -849,7 +849,7 @@ function displayChart() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Time (Minutes)'
+                        text: 'Time'
                     }
                 }
             }
