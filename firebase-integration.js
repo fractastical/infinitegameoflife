@@ -460,25 +460,35 @@ function showGameOverModal(score, timePlayed) {
   document.getElementById('finalScore').textContent = score;
   document.getElementById('timePlayed').textContent = Math.floor(timePlayed / 1000);
   
-  // Load top scores
-  loadLeaderboard().then(scores => {
+const segment = determineSegment(timePlayed);
+firebase.firestore()
+  .collection("leaderboards")
+  .where("segment", "==", segment)
+  .orderBy("score", "desc")
+  .limit(10)
+  .get()
+  .then(snapshot => {
     const topScoresList = document.getElementById('topScoresList');
     topScoresList.innerHTML = '';
-    
-    scores.forEach((entry, index) => {
+    if (snapshot.empty) {
+      topScoresList.innerHTML = '<li>No scores yet!</li>';
+      return;
+    }
+    snapshot.forEach(doc => {
+      const data = doc.data();
       const li = document.createElement('li');
-      li.textContent = `${entry.nickname}: ${entry.score}`;
-      
-      if (entry.isCurrentUser) {
+      li.textContent = `${data.nickname || "Anonymous"}: ${data.score}`;
+      if (data.nickname === userNickname) {
         li.style.fontWeight = 'bold';
         li.style.color = '#FFD700';
       }
-      
       topScoresList.appendChild(li);
     });
     
-    // Show the modal
     document.getElementById('gameOverModal').style.display = 'block';
+  })
+  .catch(err => {
+    console.error("Error loading segment leaderboard:", err);
   });
   
   // Save the score if logged in
@@ -496,6 +506,15 @@ function closeGameOverModal() {
   if (gameOverModal) {
     gameOverModal.style.display = 'none';
   }
+}
+
+ function determineSegment(timePlayedMs) {
+  const seconds = timePlayedMs / 1000;
+  if (seconds < 120) return 'flash1min';
+  if (seconds < 300) return 'sprint2min';
+  if (seconds < 600) return 'casual5min';
+  if (seconds < 1200) return 'endurance10min';
+  return 'marathon20min';
 }
 
 function createGameOverModal() {
