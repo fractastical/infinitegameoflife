@@ -71,6 +71,31 @@
       </div>
     </div>
 
+<div id="helpContainer">
+  <button id="closeHelpBtn">X</button>
+  <h2>Button Guide</h2>
+  <ul>
+    <li><strong>S</strong> — Switch Dimension</li>
+    <li><strong>+</strong> — Add Dimension</li>
+    <li><strong>G</strong> — Glider</li>
+    <li><strong>B</strong> — Blinker</li>
+    <li><strong>T</strong> — Toad</li>
+    <li><strong>E</strong> — Beacon</li>
+    <li><strong>K</strong> — Block</li>
+    <li><strong>H</strong> — Beehive</li>
+    <li><strong>L</strong> — Loaf</li>
+    <li><strong>O</strong> — Boat</li>
+    <li><strong>P</strong> — Pulsar</li>
+    <li><strong>U</strong> — Glider Gun</li>
+    <li><strong>R</strong> — R-Pentomino</li>
+    <li><strong>F</strong> — Faster</li>
+    <li><strong>A</strong> — Age +</li>
+  </ul>
+</div>
+
+<!-- Help Button -->
+<div id="openHelpBtn">?</div>
+    
     <div id="sidebar">
         <div id="closeBtn">X</div>
         <h2>Multidimensional Game of Life</h2>
@@ -815,6 +840,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
     document.getElementById('leaderboardContainer').classList.remove('open');
   });
+
+    document.getElementById('openHelpBtn').addEventListener('click', () => {
+      document.getElementById('helpContainer').classList.add('open');
+    });
+
+    document.getElementById('closeHelpBtn').addEventListener('click', () => {
+      document.getElementById('helpContainer').classList.remove('open');
+    });
 
   // Optional: toggle chart sidebar on button click
   const chartBtn = document.getElementById('openChartBtn');

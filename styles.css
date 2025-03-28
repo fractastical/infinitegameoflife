@@ -66,6 +66,11 @@ button {
     cursor: pointer;
 }
 
+#openHelpBtn,
+#helpContainer {
+    display: none;
+}
+
 /* Sidebar Styles */
 #sidebar {
     position: fixed;
@@ -86,7 +91,8 @@ button {
 }
 
 #closeBtn,
-#closeLeaderboardBtn {
+#closeLeaderboardBtn,
+#closeHelpBtn {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -99,7 +105,8 @@ button {
 }
 
 #openSidebarBtn,
-#openLeaderboardBtn {
+#openLeaderboardBtn,
+#openHelpBtn {
     position: fixed;
     right: 0;
     top: 50%;
@@ -121,7 +128,12 @@ button {
     top: 55%;
 }
 
-#leaderboardContainer {
+#openHelpBtn {
+    top: 65%;
+}
+
+#leaderboardContainer,
+#helpContainer {
     position: fixed;
     right: -330px;
     top: 0;
@@ -135,7 +147,8 @@ button {
     z-index: 9996;
 }
 
-#leaderboardContainer.open {
+#leaderboardContainer.open,
+#helpContainer.open {
     right: 0;
 }
 
@@ -212,19 +225,25 @@ button {
 /* Desktop Styles */
 @media (min-width: 769px) {
     body {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-        overflow-y: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
     }
 
     #mainWrapper {
-        flex-direction: row;
-        align-items: flex-start;
+        flex-direction: column;
+        align-items: center;
     }
 
     #desktopInfoPanel {
         display: block;
+    }
+
+    #controls {
+        display: grid;
+        grid-template-columns: repeat(3, 200px);
+        justify-content: center;
+        width: auto;
     }
 }
 
@@ -307,6 +326,18 @@ button {
         width: 90vw;
         max-height: 90vh;
         overflow-y: auto;
+        font-size: 14px;
+    }
+
+    #helpContainer,
+    #openHelpBtn {
+        display: block;
+    }
+
+    #helpContainer {
+        background-color: #333;
+        color: white;
+        padding: 20px;
         font-size: 14px;
     }
 
