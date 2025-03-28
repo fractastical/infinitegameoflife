@@ -185,6 +185,59 @@
         }
     }
 
+@media (max-width: 768px) and (orientation: landscape) {
+  body {
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  #gameContainer {
+    width: auto;
+    height: 100vh;
+  }
+
+  #controls {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 60px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px;
+    overflow-y: auto;
+    background: #f0f0f0;
+    padding: 5px 0;
+  }
+
+  #score, #info, #milestoneScores, #chartSidebar, #openSidebarBtn {
+    display: none;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+  }
+
+  button span {
+    display: none;
+  }
+
+  button::after {
+    content: attr(data-short);
+  }
+}
+
+    html, body {
+      overflow: hidden;
+      height: 100%;
+      touch-action: none;
+    }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -212,23 +265,23 @@
         <canvas id="gameCanvas" width="500" height="500"></canvas>
     </div>
     
-    <div id="controls">
-        <button onclick="switchDimension()">Switch Dimension (SPACE)</button>
-        <button onclick="addDimension()">Add Dimension</button>
-        <button onclick="addPattern('glider')">Add Glider</button>
-        <button onclick="addPattern('blinker')">Add Blinker</button>
-        <button onclick="addPattern('toad')">Add Toad</button>
-        <button onclick="addPattern('beacon')">Add Beacon</button>
-        <button onclick="addPattern('block')">Add Block</button>
-        <button onclick="addPattern('beehive')">Add Beehive</button>
-        <button onclick="addPattern('loaf')">Add Loaf</button>
-        <button onclick="addPattern('boat')">Add Boat</button>
-        <button onclick="addPattern('pulsar')">Add Pulsar</button>
-        <button onclick="addPattern('glidergun')">Add Glider Gun</button>
-        <button onclick="addPattern('r_pentomino')">Add R-pentomino</button>
-        <button onclick="increasePropagation()">Increase Propagation Rate</button>
-        <button onclick="increaseLifespan()">Increase Lifespan</button>
-    </div>
+<div id="controls">
+  <button onclick="switchDimension()" data-short="S"><span>Switch Dimension</span></button>
+  <button onclick="addDimension()" data-short="+"><span>Add Dimension</span></button>
+  <button onclick="addPattern('glider')" data-short="G"><span>Add Glider</span></button>
+  <button onclick="addPattern('blinker')" data-short="B"><span>Add Blinker</span></button>
+  <button onclick="addPattern('toad')" data-short="T"><span>Add Toad</span></button>
+  <button onclick="addPattern('beacon')" data-short="E"><span>Add Beacon</span></button>
+  <button onclick="addPattern('block')" data-short="K"><span>Add Block</span></button>
+  <button onclick="addPattern('beehive')" data-short="H"><span>Add Beehive</span></button>
+  <button onclick="addPattern('loaf')" data-short="L"><span>Add Loaf</span></button>
+  <button onclick="addPattern('boat')" data-short="O"><span>Add Boat</span></button>
+  <button onclick="addPattern('pulsar')" data-short="P"><span>Add Pulsar</span></button>
+  <button onclick="addPattern('glidergun')" data-short="U"><span>Add Glider Gun</span></button>
+  <button onclick="addPattern('r_pentomino')" data-short="R"><span>Add R-Pentomino</span></button>
+  <button onclick="increasePropagation()" data-short="F"><span>Faster</span></button>
+  <button onclick="increaseLifespan()" data-short="A"><span>Age +</span></button>
+</div>
 
     <div id="info">
         <p>Active Dimension: <span id="activeDimensionDisplay">1</span></p>
