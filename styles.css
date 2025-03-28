@@ -20,7 +20,7 @@ html, body {
 #mainWrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
 }
 
 #score,
@@ -44,7 +44,7 @@ html, body {
     gap: 10px;
     justify-content: center;
     margin-bottom: 20px;
-    max-width: 500px;
+    width: 300px;
     z-index: 2;
 }
 
@@ -200,13 +200,21 @@ button {
 /* Desktop Styles */
 @media (min-width: 769px) {
     body {
-        flex-direction: column;
-        margin-left: 300px;
-        overflow-y: auto;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: scroll;
+    }
+
+    #mainWrapper {
+        margin-right: 20px;
     }
 
     #controls {
-        grid-template-columns: repeat(3, minmax(100px, 1fr));
+        display: grid;
+        grid-template-columns: repeat(3, 200px);
+        justify-content: flex-start;
+        width: auto;
     }
 }
 
@@ -225,8 +233,8 @@ button {
     }
 
     #gameContainer {
-        width: auto;
-        height: 100vh;
+        width: 400px;
+        height: 400px;
         margin: 0;
     }
 
@@ -241,22 +249,24 @@ button {
         position: fixed;
         right: 0;
         top: 0;
-        width: 60px;
+        width: 200px;
         height: 100vh;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: 48px;
+        justify-content: center;
+        align-items: start;
         gap: 4px;
         overflow-y: auto;
         background: #f0f0f0;
-        padding: 5px 0;
+        padding: 10px 5px;
         z-index: 3;
     }
 
     #controls button {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
+        width: 100%;
+        height: 100%;
+        font-size: 14px;
         padding: 0;
     }
 
