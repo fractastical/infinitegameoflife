@@ -173,7 +173,7 @@
     const LOG_INTERVAL_SECONDS = 10;
     
     // Define game state
-    let propagationRate = 100; // milliseconds
+    let propagationRate = 250; // milliseconds
     let lifespan = 20; // steps
     
     // Initialize multi-dimensional grid with unique color per dimension
@@ -243,6 +243,9 @@
             gameStartTime = new Date();
             simulationStarted = false;
             console.log("Game started!");
+
+            // ✅ actually start the game loop
+            startGame();
         }
     }
 
