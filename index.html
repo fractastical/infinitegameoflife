@@ -26,12 +26,6 @@
             height: 500px;
             margin-bottom: 20px;
         }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: 1px solid #000;
-        }
         #controls {
             display: flex;
             flex-wrap: wrap;
@@ -40,6 +34,21 @@
             margin-bottom: 20px;
             max-width: 500px;
         }
+        .patternEntry {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .patternCanvas {
+            width: 100px;
+            height: 100px;
+            background-color: #111;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
         button {
             padding: 5px 10px;
             font-size: 14px;
@@ -103,6 +112,13 @@
             margin-bottom: 20px;
             border: 1px solid #fff;
         }
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 1px solid #000;
+        }
+
     </style>
 </head>
 <body>
@@ -117,10 +133,11 @@
 
     <div id="score">Score: 0</div>
     <div id="milestoneScores">
-        <p>Score after 2 minutes: <span id="score2min">Not reached</span></p>
-        <p>Score after 5 minutes: <span id="score5min">Not reached</span></p>
-        <p>Score after 10 minutes: <span id="score10min">Not reached</span></p>
-        <p>Score after 20 minutes: <span id="score20min">Not reached</span></p>
+      <p>Score after 1 minute: <span id="score1min">Not reached</span></p>
+      <p>Score after 2 minutes: <span id="score2min">Not reached</span></p>
+      <p>Score after 5 minutes: <span id="score5min">Not reached</span></p>
+      <p>Score after 10 minutes: <span id="score10min">Not reached</span></p>
+      <p>Score after 20 minutes: <span id="score20min">Not reached</span></p>
     </div>
     
     <div id="gameContainer">
@@ -152,44 +169,59 @@
         <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
     </div>
 
-    <div id="openSidebarBtn">Info</div>
+    <div id="openSidebarBtn">Patterns</div>
 
     <div id="sidebar">
         <div id="closeBtn">X</div>
         <h2>Game of Life Patterns</h2>
 
-        <!-- Render JavaScript Patterns -->
-        <h3>Glider</h3>
-        <p>The glider is a small, self-propagating pattern.</p>
-        <canvas class="patternCanvas" id="gliderPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="gliderPattern"></canvas>
+          <h3>Glider</h3>
+          <p>The glider is a small, self-propagating pattern.</p>
+        </div>
 
-        <h3>Block</h3>
-        <p>The block is a simple still life that remains stable over time.</p>
-        <canvas class="patternCanvas" id="blockPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="blockPattern"></canvas>
+          <h3>Block</h3>
+          <p>The block is a simple still life that remains stable over time.</p>
+        </div>
 
-        <h3>Beehive</h3>
-        <p>The beehive is another stable pattern that doesn’t change over time.</p>
-        <canvas class="patternCanvas" id="beehivePattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="beehivePattern"></canvas>
+          <h3>Beehive</h3>
+          <p>The beehive is another stable pattern that doesn’t change over time.</p>
+        </div>
 
-        <h3>Loaf</h3>
-        <p>The loaf is a still life that remains unchanged throughout the game.</p>
-        <canvas class="patternCanvas" id="loafPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="loafPattern"></canvas>
+          <h3>Loaf</h3>
+          <p>The loaf is a still life that remains unchanged throughout the game.</p>
+        </div>
 
-        <h3>Boat</h3>
-        <p>The boat is a stable still life pattern.</p>
-        <canvas class="patternCanvas" id="boatPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="boatPattern"></canvas>
+          <h3>Boat</h3>
+          <p>The boat is a stable still life pattern.</p>
+        </div>
 
-        <h3>Pulsar</h3>
-        <p>The pulsar is a large, symmetric oscillator with a period of 3.</p>
-        <canvas class="patternCanvas" id="pulsarPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="pulsarPattern"></canvas>
+          <h3>Pulsar</h3>
+          <p>The pulsar is a large, symmetric oscillator with a period of 3.</p>
+        </div>
 
-        <h3>Glider Gun</h3>
-        <p>The glider gun generates new gliders periodically.</p>
-        <canvas class="patternCanvas" id="glidergunPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="glidergunPattern"></canvas>
+          <h3>Glider Gun</h3>
+          <p>The glider gun generates new gliders periodically.</p>
+        </div>
 
-        <h3>R-pentomino</h3>
-        <p>The R-pentomino is a methuselah pattern that evolves unpredictably.</p>
-        <canvas class="patternCanvas" id="rpentominoPattern"></canvas>
+        <div class="patternEntry">
+          <canvas class="patternCanvas" id="rpentominoPattern"></canvas>
+          <h3>R-pentomino</h3>
+          <p>The R-pentomino is a methuselah pattern that evolves unpredictably.</p>
+        </div>
     </div>
 
 
@@ -223,6 +255,7 @@
     
     let score = 0;
     let gameStartTime = new Date();
+    let oneMinuteScoreRecorded = false;
     let twoMinuteScoreRecorded = false;
     let fiveMinuteScoreRecorded = false;
     let tenMinuteScoreRecorded = false;
@@ -474,6 +507,7 @@
             score = 0;
             document.getElementById('score').textContent = 'Score: 0';
             gameStartTime = new Date();
+
             twoMinuteScoreRecorded = false;
             fiveMinuteScoreRecorded = false;
             tenMinuteScoreRecorded = false;
@@ -521,30 +555,50 @@
     }
     
     // Check milestone scores
-    function checkMilestoneScores() {
-        const currentTime = new Date();
-        const elapsedMinutes = (currentTime - gameStartTime) / 60000;
-        
-        if (elapsedMinutes >= 2 && !twoMinuteScoreRecorded) {
+        function checkMilestoneScores() {
+          const currentTime = new Date();
+          const elapsedMinutes = (currentTime - gameStartTime) / 60000;
+
+          if (elapsedMinutes >= 1 && !oneMinuteScoreRecorded) {
+            document.getElementById('score1min').textContent = score;
+            oneMinuteScoreRecorded = true;
+            if (window.firebase && firebase.firestore) {
+              saveSegmentScore(score, "flash1min", window.GameFirebase?.getUserNickname?.() || "Guest");
+            }
+          }
+
+          if (elapsedMinutes >= 2 && !twoMinuteScoreRecorded) {
             document.getElementById('score2min').textContent = score;
             twoMinuteScoreRecorded = true;
-        }
-        
-        if (elapsedMinutes >= 5 && !fiveMinuteScoreRecorded) {
+            if (window.firebase && firebase.firestore) {
+              saveSegmentScore(score, "sprint2min", window.GameFirebase?.getUserNickname?.() || "Guest");
+            }
+          }
+
+          if (elapsedMinutes >= 5 && !fiveMinuteScoreRecorded) {
             document.getElementById('score5min').textContent = score;
             fiveMinuteScoreRecorded = true;
-        }
-        
-        if (elapsedMinutes >= 10 && !tenMinuteScoreRecorded) {
+            if (window.firebase && firebase.firestore) {
+              saveSegmentScore(score, "casual5min", window.GameFirebase?.getUserNickname?.() || "Guest");
+            }
+          }
+
+          if (elapsedMinutes >= 10 && !tenMinuteScoreRecorded) {
             document.getElementById('score10min').textContent = score;
             tenMinuteScoreRecorded = true;
-        }
-        
-        if (elapsedMinutes >= 20 && !twentyMinuteScoreRecorded) {
+            if (window.firebase && firebase.firestore) {
+              saveSegmentScore(score, "endurance10min", window.GameFirebase?.getUserNickname?.() || "Guest");
+            }
+          }
+
+          if (elapsedMinutes >= 20 && !twentyMinuteScoreRecorded) {
             document.getElementById('score20min').textContent = score;
             twentyMinuteScoreRecorded = true;
+            if (window.firebase && firebase.firestore) {
+              saveSegmentScore(score, "marathon20min", window.GameFirebase?.getUserNickname?.() || "Guest");
+            }
+          }
         }
-    }
     
     // Track mouse movement for pattern preview
     canvas.addEventListener('mousemove', function(event) {
@@ -618,6 +672,27 @@
         
         draw(); // Update canvas to show placement preview
     };
+
+    function renderPatternToCanvas(canvasId, pattern) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const cellSize = 10;
+    canvas.width = canvas.height = 100; // Ensure square
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+
+    // Center the pattern
+    const offsetX = (canvas.width / 2) / cellSize - 2;
+    const offsetY = (canvas.height / 2) / cellSize - 2;
+
+    pattern.forEach(([x, y]) => {
+        ctx.fillRect((x + offsetX) * cellSize, (y + offsetY) * cellSize, cellSize, cellSize);
+    });
+}
+
     
     // Place the selected pattern at specified coordinates
     function placePattern(patternName, startX, startY) {
@@ -695,6 +770,15 @@
     
     // Initialize the game
     draw();
+    renderPatternToCanvas("gliderPattern", patterns.glider);
+    renderPatternToCanvas("blockPattern", patterns.block);
+    renderPatternToCanvas("beehivePattern", patterns.beehive);
+    renderPatternToCanvas("loafPattern", patterns.loaf);
+    renderPatternToCanvas("boatPattern", patterns.boat);
+    renderPatternToCanvas("pulsarPattern", patterns.pulsar);
+    renderPatternToCanvas("glidergunPattern", patterns.glidergun);
+    renderPatternToCanvas("rpentominoPattern", patterns.r_pentomino);
+
     startGame();
 })();</script>
 
