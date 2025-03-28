@@ -4,242 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi-Dimensional Conway's Game of Life with Distinct Colors v.133</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        #score {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        #gameContainer {
-            position: relative;
-            width: 500px;
-            height: 500px;
-            margin-bottom: 20px;
-        }
-        #controls {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            max-width: 500px;
-        }
-        .patternEntry {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .patternCanvas {
-            width: 100px;
-            height: 100px;
-            background-color: #111;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        button {
-            padding: 5px 10px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #info {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #chartContainer {
-            width: 500px;
-            height: 400px;
-            margin-top: 20px;
-        }
-        /* Right Sidebar Styles */
-        #sidebar {
-            position: fixed;
-            right: -330px;
-            top: 0;
-            width: 300px;
-            height: 100%;
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-            transition: 0.3s ease;
-            z-index: 9999;
-        }
-
-        #sidebar.open {
-            right: 0;
-        }
-
-        #closeBtn {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            cursor: pointer;
-        }
-
-        #openSidebarBtn {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 10px;
-            background-color: #333;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px 0 0 5px;
-            z-index: 9998;
-        }
-
-        #sidebar h3 {
-            margin-top: 20px;
-        }
-
-        .patternCanvas {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 20px;
-            border: 1px solid #fff;
-        }
-        #gameCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            border: 1px solid #000;
-        }
-        #segment-leaderboards ul {
-          padding-left: 0;
-          list-style-type: none;
-          margin-bottom: 15px;
-        }
-        #segment-leaderboards ul strong {
-          display: block;
-          margin-bottom: 5px;
-        }
-
-        #chartSidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 300px;
-            height: 100%;
-            background-color: #fff;
-            border-right: 1px solid #ccc;
-            padding: 10px;
-            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-            z-index: 9997;
-            overflow-y: auto;
-        }
-
-        #chartHeader {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #scoreChart {
-            width: 100% !important;
-            height: auto !important;
-        }
-        body {
-            margin-left: 300px; /* Leave space for left sidebar */
-        }
-
-    @media (max-width: 768px) {
-        #chartSidebar {
-            position: fixed;
-            left: -300px;
-            transition: left 0.3s ease;
-            z-index: 9999;
-        }
-
-        #chartSidebar.open {
-            left: 0;
-        }
-
-        body.sidebar-open {
-            margin-left: 0;
-        }
-
-        #openChartBtn {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 10px;
-            background-color: #333;
-            color: white;
-            border-radius: 0 5px 5px 0;
-            cursor: pointer;
-            z-index: 9998;
-        }
-    }
-
-@media (max-width: 768px) and (orientation: landscape) {
-  body {
-    flex-direction: row;
-    justify-content: center;
-    align-items: stretch;
-  }
-
-  #gameContainer {
-    width: auto;
-    height: 100vh;
-  }
-
-  #controls {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 60px;
-    height: 100vh;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 4px;
-    overflow-y: auto;
-    background: #f0f0f0;
-    padding: 5px 0;
-  }
-
-  #score, #info, #milestoneScores, #chartSidebar, #openSidebarBtn {
-    display: none;
-  }
-
-  button {
-    font-size: 16px;
-    padding: 6px;
-    width: 32px;
-    height: 32px;
-  }
-
-  button span {
-    display: none;
-  }
-
-  button::after {
-    content: attr(data-short);
-  }
-}
-
-    html, body {
-      overflow: hidden;
-      height: 100%;
-      touch-action: none;
-    }
-
-    </style>
+  
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css" />
 
 </head>
 <body>
@@ -1008,7 +775,7 @@ const labels = dimensionScores[0]?.map((_, i) => `${(i + 1) * 10}s`) || [];
   </div>
   <canvas id="scoreChart" width="260" height="400"></canvas>
 </div>
-<div id="openChartBtn">Chart</div>
+<!-- <div id="openChartBtn">Chart</div> -->
 
 <script>
 
@@ -1030,10 +797,10 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
-document.getElementById('openChartBtn').addEventListener('click', () => {
-    document.getElementById('chartSidebar').classList.toggle('open');
-    document.body.classList.toggle('sidebar-open');
-});
+// document.getElementById('openChartBtn').addEventListener('click', () => {
+//     document.getElementById('chartSidebar').classList.toggle('open');
+//     document.body.classList.toggle('sidebar-open');
+// });
 
 </script>
 

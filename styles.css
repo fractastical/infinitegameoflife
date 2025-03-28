@@ -1,0 +1,270 @@
+/* General Styles */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+html, body {
+    overflow: hidden;
+    height: 100%;
+    touch-action: none;
+}
+
+#mainWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#score,
+#milestoneScores {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+#gameContainer {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    margin-bottom: 20px;
+    z-index: 1;
+}
+
+#controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    max-width: 500px;
+    z-index: 2;
+}
+
+button {
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Sidebar Styles */
+#sidebar {
+    position: fixed;
+    right: -330px;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+    transition: 0.3s ease;
+    z-index: 9999;
+}
+
+#sidebar.open {
+    right: 0;
+}
+
+#closeBtn,
+#openSidebarBtn {
+    position: absolute;
+    top: 10px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+}
+
+#closeBtn {
+    left: 10px;
+}
+
+#openSidebarBtn {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px;
+    border-radius: 5px 0 0 5px;
+    z-index: 9998;
+}
+
+.patternCanvas {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    border: 1px solid #fff;
+    background-color: #111;
+}
+
+#gameCanvas {
+    position: relative;
+    top: 0;
+    left: 0;
+    border: 1px solid #000;
+    z-index: 1;
+}
+
+#segment-leaderboards ul {
+    padding-left: 0;
+    list-style-type: none;
+    margin-bottom: 15px;
+}
+
+#segment-leaderboards ul strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* Chart Sidebar */
+#chartSidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    border-right: 1px solid #ccc;
+    padding: 10px;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    z-index: 9997;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+}
+
+#chartSidebar.hidden {
+    left: -300px;
+}
+
+#chartHeader {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#scoreChart {
+    width: 100% !important;
+    height: auto !important;
+}
+
+#closeChartBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #333;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    z-index: 10000;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    body {
+        flex-direction: column;
+        margin-left: 300px;
+    }
+
+    #controls {
+        position: relative;
+        margin-top: 0;
+    }
+
+    #chartSidebar {
+        left: 0;
+    }
+}
+
+/* Responsive layout for mobile landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        padding: 0;
+        margin: 0;
+    }
+
+    #mainWrapper {
+        flex: 1;
+    }
+
+    #gameContainer {
+        width: auto;
+        height: 100vh;
+        margin: 0;
+    }
+
+    #gameCanvas {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        display: block;
+    }
+
+    #controls {
+        position: fixed;
+        right: 0;
+        top: 0;
+        width: 60px;
+        height: 100vh;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 4px;
+        overflow-y: auto;
+        background: #f0f0f0;
+        padding: 5px 0;
+        z-index: 3;
+    }
+
+    #controls button {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        padding: 0;
+    }
+
+    #controls button span {
+        display: none;
+    }
+
+    #controls button::after {
+        content: attr(data-short);
+    }
+
+    #score,
+    #milestoneScores,
+    #info,
+    #sidebar,
+    #chartSidebar,
+    #openSidebarBtn,
+    #gameOverModal {
+        display: none !important;
+    }
+
+    body.sidebar-open {
+        margin-left: 0;
+    }
+
+    #openChartBtn {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 10px;
+        background-color: #333;
+        color: white;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+        z-index: 9998;
+    }
+}
