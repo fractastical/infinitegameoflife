@@ -130,6 +130,8 @@
 
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
 
@@ -267,16 +269,22 @@
     
     let score = 0;
     let gameStartTime = new Date();
+    
+    let activeDimension = 1;
+    let totalDimensions = 3;
+
+    let dimensionScores = Array.from({ length: totalDimensions }, () => []);
+
     let oneMinuteScoreRecorded = false;
     let twoMinuteScoreRecorded = false;
     let fiveMinuteScoreRecorded = false;
     let tenMinuteScoreRecorded = false;
     let twentyMinuteScoreRecorded = false;
     let gameActive = true;
-
+    let lastLoggedInterval = 0;
+    const LOG_INTERVAL_SECONDS = 10;
+    
     // Define game state
-    let activeDimension = 1;
-    let totalDimensions = 3;
     let propagationRate = 100; // milliseconds
     let lifespan = 20; // steps
     
@@ -367,6 +375,15 @@
             window.GameFirebase.showGameOverModal(score, timePlayed);
         }
     }
+}
+
+function logDimensionScores() {
+    for (let d = 0; d < totalDimensions; d++) {
+        const liveCells = dimensions[d].flat().filter(cell => cell.state === 1).length;
+        if (!dimensionScores[d]) dimensionScores[d] = [];
+        dimensionScores[d].push(liveCells);
+    }
+    displayChart();
 }
 
 
@@ -559,10 +576,20 @@
     
     // Game loop
     let gameInterval;
+    let elapsedSeconds = 0;
+
     function startGame() {
         gameInterval = setInterval(() => {
             update();
             draw();
+            
+            elapsedSeconds += propagationRate / 1000;
+            const currentInterval = Math.floor(elapsedSeconds / LOG_INTERVAL_SECONDS);
+            if (currentInterval > lastLoggedInterval) {
+                lastLoggedInterval = currentInterval;
+                logDimensionScores();
+            }
+
         }, propagationRate);
     }
     
@@ -705,6 +732,62 @@
     });
 }
 
+
+function displayChart() {
+    const ctx = document.getElementById('scoreChart').getContext('2d');
+
+    // Destroy previous instance if it exists
+    if (window.scoreChartInstance) {
+        window.scoreChartInstance.destroy();
+    }
+
+    // Generate minute labels
+    const minutes = dimensionScores[0]?.map((_, i) => `Min ${i + 1}`) || [];
+
+    // Create new chart instance
+    window.scoreChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: minutes,
+            datasets: dimensions.map((dimension, index) => ({
+                label: `Dimension ${index + 1}`,
+                data: dimensionScores[index],
+                borderColor: dimensionColors[index], // <-- fix here
+                fill: false,
+                tension: 0.3
+            }))
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Scores Over Time'
+                },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Live Cell Count'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time (Minutes)'
+                    }
+                }
+            }
+        }
+    });
+}
+
     
     // Place the selected pattern at specified coordinates
     function placePattern(patternName, startX, startY) {
@@ -753,10 +836,11 @@
     
     // Add dimension
     window.addDimension = function() {
-        if (totalDimensions < 10) {
+        if (totalDimensions < 13) {
             const newDimensionColor = getRandomColor();
             dimensionColors.push(newDimensionColor);
             dimensions.push(createEmptyGrid(newDimensionColor));
+            dimensionScores.push([]); // Track scores for new dimension
             totalDimensions++;
             document.getElementById('totalDimensionsDisplay').textContent = totalDimensions;
         }
@@ -815,6 +899,10 @@ document.addEventListener('keydown', function(event) {
 });
 
 </script>
+<div id="chartContainer" style="margin-top: 40px; max-width: 600px;">
+    <h2 style="text-align: center;">Scores per Dimension Over Time</h2>
+    <canvas id="scoreChart" width="500" height="300"></canvas>
+</div>
 
 </body>
 </html>
