@@ -330,6 +330,22 @@ async function loadUserData(userId) {
   }
 }
 
+async function saveSegmentScore(score, segment, nickname = "Player") {
+  try {
+    const db = firebase.firestore();
+    await db.collection("leaderboards").add({
+      score: score,
+      nickname: nickname,
+      segment: segment,
+      timestamp: new Date()
+    });
+    console.log(`Saved score ${score} to segment ${segment}`);
+  } catch (err) {
+    console.error("Error saving score:", err);
+  }
+}
+
+
 // Save score to Firebase
 async function saveScore(score, gameData = {}) {
   if (!isLoggedIn || !userId) {
