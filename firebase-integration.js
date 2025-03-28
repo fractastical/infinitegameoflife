@@ -39,6 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Load the leaderboard
   loadLeaderboard();
+  loadTopScoresBySegment(); // ← new function for per-segment top 3
+
 });
 
 function setupDOMReferences() {
@@ -106,6 +108,11 @@ function createAuthUI() {
     </div>
   `;
   
+    const segmentBoard = document.createElement('div');
+  segmentBoard.id = 'segment-leaderboards';
+  // segmentBoard.innerHTML = `<h3>Top Scores by Segment</h3>`;
+  leaderboardContainer.appendChild(segmentBoard);
+
   // Add the elements to the body
   document.body.appendChild(loginContainer);
   document.body.appendChild(userInfo);
@@ -267,6 +274,50 @@ async function signupUser(nickname, email, password) {
   }
 }
 
+
+async function loadTopScoresBySegment(segments = ['flash1min', 'sprint2min', 'casual5min', 'endurance10min', 'marathon20min']) {
+  const container = document.getElementById('segment-leaderboards');
+  if (!container) return;
+
+  container.innerHTML = '<h3>Top Scores by Segment</h3>';
+
+  for (const segment of segments) {
+    const snapshot = await firebase.firestore()
+      .collection("leaderboards")
+      .where("segment", "==", segment)
+      .orderBy("score", "desc")
+      .limit(3)
+      .get();
+
+    const titleMap = {
+      flash1min: "🏁 Flash (1 min)",
+      sprint2min: "⚡ Sprint (2 min)",
+      casual5min: "🧘 Casual (5 min)",
+      endurance10min: "🔥 Endurance (10 min)",
+      marathon20min: "🏆 Marathon (20 min)"
+    };
+
+    const title = titleMap[segment] || segment;
+    const ul = document.createElement('ul');
+    ul.innerHTML = `<strong>${title}</strong>`;
+
+    if (snapshot.empty) {
+      const li = document.createElement('li');
+      li.textContent = "No scores yet";
+      ul.appendChild(li);
+    } else {
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const li = document.createElement('li');
+        li.textContent = `${data.nickname || 'Anonymous'}: ${data.score}`;
+        ul.appendChild(li);
+      });
+    }
+
+    container.appendChild(ul);
+  }
+}
+
 async function logoutUser() {
   try {
     await firebase.auth().signOut();
@@ -415,7 +466,7 @@ async function loadLeaderboard(limit = 10) {
       });
     });
     
-    displayLeaderboard(leaderboardData);
+    // displayLeaderboard(leaderboardData);
     return leaderboardData;
   } catch (error) {
     console.error('Error loading leaderboard:', error);

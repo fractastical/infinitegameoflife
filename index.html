@@ -118,6 +118,16 @@
             left: 0;
             border: 1px solid #000;
         }
+        #segment-leaderboards ul {
+          padding-left: 0;
+          list-style-type: none;
+          margin-bottom: 15px;
+        }
+        #segment-leaderboards ul strong {
+          display: block;
+          margin-bottom: 5px;
+        }
+
 
     </style>
 </head>
@@ -785,14 +795,6 @@
 })();</script>
 
 <script>
-    function determineSegment(timePlayedMs) {
-  const seconds = timePlayedMs / 1000;
-  if (seconds < 120) return 'flash1min';
-  if (seconds < 300) return 'sprint2min';
-  if (seconds < 600) return 'casual5min';
-  if (seconds < 1200) return 'endurance10min';
-  return 'marathon20min';
-}
 
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('openSidebarBtn').addEventListener('click', function () {
