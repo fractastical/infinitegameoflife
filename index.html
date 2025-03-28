@@ -58,6 +58,16 @@
     </div>
 
     <div id="openSidebarBtn">Patterns</div>
+    <div id="openLeaderboardBtn">Leaderboards</div>
+
+    <div id="leaderboardContainer">
+      <button id="closeLeaderboardBtn">X</button>
+      <div id="leaderboard">
+        <h2>Leaderboard</h2>
+        <ol id="leaderboard-list"></ol>
+        <div id="segment-leaderboards"></div>
+      </div>
+    </div>
 
     <div id="sidebar">
         <div id="closeBtn">X</div>
@@ -787,6 +797,17 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById('closeBtn').addEventListener('click', function () {
         document.getElementById('sidebar').classList.remove('open');
     });
+
+    document.getElementById('openLeaderboardBtn').addEventListener('click', () => {
+      document.getElementById('leaderboardContainer').classList.add('open');
+    });
+
+    document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
+      document.getElementById('leaderboardContainer').classList.remove('open');
+    });
+
+
+
 });
 document.addEventListener('keydown', function(event) {
   if (event.code === 'Space') {
@@ -796,6 +817,8 @@ document.addEventListener('keydown', function(event) {
     }
   }
 });
+
+
 
 // document.getElementById('openChartBtn').addEventListener('click', () => {
 //     document.getElementById('chartSidebar').classList.toggle('open');

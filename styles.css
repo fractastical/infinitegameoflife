@@ -74,26 +74,57 @@ button {
 }
 
 #closeBtn,
-#openSidebarBtn {
+#closeLeaderboardBtn {
     position: absolute;
     top: 10px;
+    right: 10px;
     cursor: pointer;
     background-color: #333;
     color: white;
+    padding: 5px;
+    border: none;
+    border-radius: 5px;
 }
 
-#closeBtn {
-    left: 10px;
-}
-
-#openSidebarBtn {
+#openSidebarBtn,
+#openLeaderboardBtn {
     position: fixed;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
     padding: 10px;
+    background-color: #333;
+    color: white;
+    border: none;
     border-radius: 5px 0 0 5px;
-    z-index: 9998;
+    z-index: 10000;
+}
+
+#openSidebarBtn {
+    top: 45%;
+}
+
+#openLeaderboardBtn {
+    top: 55%;
+}
+
+
+#leaderboardContainer {
+    position: fixed;
+    right: -330px;
+    top: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #444;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+    transition: right 0.3s ease;
+    z-index: 9996;
+}
+
+#leaderboardContainer.open {
+    right: 0;
 }
 
 .patternCanvas {
@@ -126,7 +157,7 @@ button {
 /* Chart Sidebar */
 #chartSidebar {
     position: fixed;
-    left: 0;
+    left: -300px;
     top: 0;
     width: 300px;
     height: 100%;
@@ -139,8 +170,8 @@ button {
     transition: left 0.3s ease;
 }
 
-#chartSidebar.hidden {
-    left: -300px;
+#chartSidebar.open {
+    left: 0;
 }
 
 #chartHeader {
@@ -176,10 +207,6 @@ button {
     #controls {
         position: relative;
         margin-top: 0;
-    }
-
-    #chartSidebar {
-        left: 0;
     }
 }
 

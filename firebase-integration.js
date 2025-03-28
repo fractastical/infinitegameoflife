@@ -100,7 +100,7 @@ function createAuthUI() {
   
   // Create leaderboard container
   const leaderboardContainer = document.createElement('div');
-  leaderboardContainer.id = 'leaderboard-container';
+  leaderboardContainer.id = 'leaderboardContainer';
   leaderboardContainer.innerHTML = `
     <div id="leaderboard">
       <h2>Leaderboard</h2>
