@@ -790,25 +790,43 @@ const labels = dimensionScores[0]?.map((_, i) => `${(i + 1) * 10}s`) || [];
 <script>
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById('openSidebarBtn').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.add('open');
+  // Open chart sidebar by default on desktop (min-width: 769px)
+  if (window.innerWidth >= 769) {
+    document.getElementById('chartSidebar').classList.add('open');
+  }
+
+  document.getElementById('openSidebarBtn').addEventListener('click', function () {
+      document.getElementById('sidebar').classList.add('open');
+  });
+
+  document.getElementById('closeBtn').addEventListener('click', function () {
+      document.getElementById('sidebar').classList.remove('open');
+  });
+
+  document.getElementById('openLeaderboardBtn').addEventListener('click', () => {
+    document.getElementById('leaderboardContainer').classList.add('open');
+  });
+
+  document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
+    document.getElementById('leaderboardContainer').classList.remove('open');
+  });
+
+  // Optional: toggle chart sidebar on button click
+  const chartBtn = document.getElementById('openChartBtn');
+  if (chartBtn) {
+    chartBtn.addEventListener('click', () => {
+      document.getElementById('chartSidebar').classList.toggle('open');
     });
+  }
 
-    document.getElementById('closeBtn').addEventListener('click', function () {
-        document.getElementById('sidebar').classList.remove('open');
+  const closeChart = document.getElementById('closeChartBtn');
+  if (closeChart) {
+    closeChart.addEventListener('click', () => {
+      document.getElementById('chartSidebar').classList.remove('open');
     });
-
-    document.getElementById('openLeaderboardBtn').addEventListener('click', () => {
-      document.getElementById('leaderboardContainer').classList.add('open');
-    });
-
-    document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
-      document.getElementById('leaderboardContainer').classList.remove('open');
-    });
-
-
-
+  }
 });
+
 document.addEventListener('keydown', function(event) {
   if (event.code === 'Space') {
     event.preventDefault(); // Prevent default space scrolling

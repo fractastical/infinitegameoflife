@@ -92,12 +92,13 @@ button {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
-    padding: 10px;
+    padding: 10px 12px;
     background-color: #333;
     color: white;
     border: none;
     border-radius: 5px 0 0 5px;
     z-index: 10000;
+    margin: 5px 0;
 }
 
 #openSidebarBtn {
@@ -107,7 +108,6 @@ button {
 #openLeaderboardBtn {
     top: 55%;
 }
-
 
 #leaderboardContainer {
     position: fixed;
