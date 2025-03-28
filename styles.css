@@ -9,10 +9,10 @@ body {
     padding: 20px;
     background-color: #f0f0f0;
     font-family: Arial, sans-serif;
+    overflow-y: auto;
 }
 
 html, body {
-    overflow: hidden;
     height: 100%;
     touch-action: none;
 }
@@ -39,10 +39,10 @@ html, body {
 }
 
 #controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
     gap: 10px;
+    justify-content: center;
     margin-bottom: 20px;
     max-width: 500px;
     z-index: 2;
@@ -202,11 +202,11 @@ button {
     body {
         flex-direction: column;
         margin-left: 300px;
+        overflow-y: auto;
     }
 
     #controls {
-        position: relative;
-        margin-top: 0;
+        grid-template-columns: repeat(3, minmax(100px, 1fr));
     }
 }
 
