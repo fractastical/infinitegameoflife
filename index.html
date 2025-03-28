@@ -57,7 +57,7 @@
         /* Right Sidebar Styles */
         #sidebar {
             position: fixed;
-            right: -300px;
+            right: -330px;
             top: 0;
             width: 300px;
             height: 100%;
@@ -152,7 +152,7 @@
         <p>Lifespan: <span id="lifespanDisplay">20</span> steps</p>
     </div>
 
-    <div id="openSidebarBtn">Patterns</div>
+    <div id="openSidebarBtn">Info</div>
 
     <div id="sidebar">
         <div id="closeBtn">X</div>
@@ -697,6 +697,18 @@
     draw();
     startGame();
 })();</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById('openSidebarBtn').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.add('open');
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.remove('open');
+    });
+});
+</script>
 
 </body>
 </html>
