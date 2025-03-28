@@ -128,6 +128,62 @@
           margin-bottom: 5px;
         }
 
+        #chartSidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background-color: #fff;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+            z-index: 9997;
+            overflow-y: auto;
+        }
+
+        #chartHeader {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #scoreChart {
+            width: 100% !important;
+            height: auto !important;
+        }
+        body {
+            margin-left: 300px; /* Leave space for left sidebar */
+        }
+
+    @media (max-width: 768px) {
+        #chartSidebar {
+            position: fixed;
+            left: -300px;
+            transition: left 0.3s ease;
+            z-index: 9999;
+        }
+
+        #chartSidebar.open {
+            left: 0;
+        }
+
+        body.sidebar-open {
+            margin-left: 0;
+        }
+
+        #openChartBtn {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px;
+            background-color: #333;
+            color: white;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            z-index: 9998;
+        }
+    }
 
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -268,8 +324,10 @@
     const rows = Math.floor(height / cellSize);
     
     let score = 0;
+    let gameStarted = false;
+
     let gameStartTime = new Date();
-    
+
     let activeDimension = 1;
     let totalDimensions = 3;
 
@@ -347,6 +405,15 @@
             }
         }
         return arr;
+    }
+
+    function startGameIfNeeded() {
+        if (!gameStarted) {
+            gameStarted = true;
+            gameStartTime = new Date();
+            simulationStarted = false;
+            console.log("Game started!");
+        }
     }
 
     function checkGameOver() {
@@ -517,7 +584,8 @@ function logDimensionScores() {
                             // Increase score for new cells
                             score++;
                             document.getElementById('score').textContent = `Score: ${score}`;
-                            
+                            startGameIfNeeded();
+
                             // Check for milestone scores
                             checkMilestoneScores();
                         }
@@ -536,6 +604,7 @@ function logDimensionScores() {
             score = 0;
             document.getElementById('score').textContent = 'Score: 0';
             gameStartTime = new Date();
+            gameStarted = false;
 
             twoMinuteScoreRecorded = false;
             fiveMinuteScoreRecorded = false;
@@ -813,6 +882,8 @@ function displayChart() {
             }
         });
         
+        startGameIfNeeded();
+
         console.log(`Placed ${cellsPlaced} cells for pattern ${patternName}`);
         document.getElementById('score').textContent = `Score: ${score}`;
         
@@ -875,8 +946,16 @@ function displayChart() {
     renderPatternToCanvas("glidergunPattern", patterns.glidergun);
     renderPatternToCanvas("rpentominoPattern", patterns.r_pentomino);
 
-    startGame();
+    // startGame();
 })();</script>
+
+<div id="chartSidebar">
+  <div id="chartHeader">
+    <h2>Live Score Chart</h2>
+  </div>
+  <canvas id="scoreChart" width="260" height="400"></canvas>
+</div>
+<div id="openChartBtn">Chart</div>
 
 <script>
 
@@ -898,11 +977,12 @@ document.addEventListener('keydown', function(event) {
   }
 });
 
+document.getElementById('openChartBtn').addEventListener('click', () => {
+    document.getElementById('chartSidebar').classList.toggle('open');
+    document.body.classList.toggle('sidebar-open');
+});
+
 </script>
-<div id="chartContainer" style="margin-top: 40px; max-width: 600px;">
-    <h2 style="text-align: center;">Scores per Dimension Over Time</h2>
-    <canvas id="scoreChart" width="500" height="300"></canvas>
-</div>
 
 </body>
 </html>
